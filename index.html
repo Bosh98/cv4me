@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CV4ME — A resume, typeset properly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFBF9; --paper-soft:#F3F1EB; --ink:#191F29; --amber:#B4833C; --slate:#6B7280;
+    --line:rgba(25,31,41,0.08); --shadow-sm: 0 1px 2px rgba(25,31,41,.04);
+    --shadow-md: 0 8px 24px -8px rgba(25,31,41,.10);
+    --shadow-lg: 0 30px 70px -24px rgba(25,31,41,.22);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .serif{ font-family:'Source Serif 4', Georgia, serif; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
+  a{ color:inherit; text-decoration:none; }
+  ::selection{ background:rgba(180,131,60,0.22); }
+
+  header{ position:sticky; top:0; z-index:20; background:rgba(250,251,249,0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom:1px solid var(--line); }
+  .nav{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-weight:600; font-size:15px; letter-spacing:-0.01em; }
+  .brand .tag{ color:var(--amber); font-family:'JetBrains Mono',monospace; font-size:10.5px; }
+  .wordmark{ font-weight:800; letter-spacing:-0.02em; }
+  .wordmark .four{ color:var(--amber); font-style:normal; padding:0 1px; }
+  .wordmark-lg{ font-size:clamp(52px,7vw,84px); line-height:0.92; font-weight:800; letter-spacing:-0.035em; opacity:0; animation:rise .8s var(--ease) forwards; }
+  .wordmark-lg .four{ color:var(--amber); display:inline-block; transform:rotate(-4deg); }
+  nav ul{ display:flex; gap:32px; list-style:none; font-size:14px; color:var(--slate); }
+  nav ul a{ transition:color .2s var(--ease); }
+  nav ul a:hover{ color:var(--ink); }
+
+  .btn{ display:inline-flex; align-items:center; gap:6px; background:var(--ink); color:var(--paper); padding:11px 20px; border-radius:9px; font-size:14px; font-weight:600; letter-spacing:-0.01em; box-shadow:var(--shadow-sm); transition:transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease); }
+  .btn:hover{ background:#2b3444; transform:translateY(-1.5px); box-shadow:var(--shadow-md); }
+  .btn:active{ transform:translateY(0); }
+
+  .hero{ padding:120px 0 84px; display:grid; grid-template-columns:1.05fr 0.95fr; gap:64px; align-items:center; }
+  .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--amber); display:flex; align-items:center; gap:9px; margin-bottom:22px; opacity:0; animation:rise .7s var(--ease) forwards; }
+  .eyebrow::before{ content:''; width:24px; height:1px; background:var(--amber); }
+  h1{ font-size:clamp(40px,4.8vw,60px); line-height:1.05; letter-spacing:-0.025em; font-weight:600; opacity:0; animation:rise .8s var(--ease) .08s forwards; }
+  h1 em{ font-style:italic; color:var(--amber); }
+  .hero p.sub{ margin-top:22px; font-size:17px; color:var(--slate); max-width:430px; line-height:1.6; opacity:0; animation:rise .8s var(--ease) .16s forwards; }
+  .hero-cta{ margin-top:34px; display:flex; align-items:center; gap:18px; opacity:0; animation:rise .8s var(--ease) .24s forwards; }
+  .price-note{ font-size:13px; color:var(--slate); }
+
+  @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes float{ 0%,100%{ transform:rotate(1.6deg) translateY(0); } 50%{ transform:rotate(1.6deg) translateY(-8px); } }
+
+  .paper-stage{ position:relative; display:flex; justify-content:center; opacity:0; animation:rise 1s var(--ease) .3s forwards; }
+  .paper{ width:330px; background:#fff; box-shadow:var(--shadow-lg); padding:34px 30px; border-radius:6px; animation:float 7s ease-in-out infinite; }
+  .paper .pname{ font-family:'Source Serif 4',serif; font-size:20px; font-weight:600; border-bottom:2px solid var(--ink); padding-bottom:9px; margin-bottom:5px; }
+  .paper .ptitle{ color:var(--amber); font-size:12px; margin-bottom:12px; }
+  .paper .pmeta{ font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--slate); margin-bottom:16px; }
+  .paper .plabel{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#B9B5A9; border-bottom:1px solid var(--line); padding-bottom:5px; margin-bottom:9px; }
+  .paper .prole{ font-size:12px; font-weight:600; margin-bottom:3px; }
+  .paper .pline{ font-size:10.5px; color:var(--slate); margin-bottom:4px; padding-left:11px; position:relative; }
+  .paper .pline::before{ content:'—'; position:absolute; left:0; color:var(--amber); }
+  .tag-chip{ position:absolute; background:var(--ink); color:var(--paper); font-family:'JetBrains Mono',monospace; font-size:11px; padding:7px 12px; border-radius:20px; top:40%; right:-4px; box-shadow:var(--shadow-md); }
+
+  section{ padding:88px 0; }
+  .section-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:44px; }
+  .section-head .n{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); }
+  .section-head h2{ font-family:'Source Serif 4',serif; font-size:30px; font-weight:600; letter-spacing:-0.015em; }
+  .section-head .rule{ flex:1; height:1px; background:var(--line); }
+
+  .features{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .feature{ background:#fff; border-radius:14px; padding:30px 26px; box-shadow:var(--shadow-sm); border:1px solid var(--line); transition:transform .3s var(--ease), box-shadow .3s var(--ease); }
+  .feature:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .feature .fn{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); margin-bottom:16px; }
+  .feature h3{ font-size:16px; font-weight:600; margin-bottom:9px; letter-spacing:-0.01em; }
+  .feature p{ font-size:13.5px; color:var(--slate); line-height:1.6; }
+
+  .pricing{ display:flex; justify-content:center; }
+  .price-card{ width:100%; max-width:420px; border-radius:18px; background:#fff; padding:44px 38px; text-align:center; position:relative; box-shadow:var(--shadow-md); border:1px solid var(--line); }
+  .price-card .n{ position:absolute; top:20px; left:22px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); }
+  .price-card h3{ font-family:'Source Serif 4',serif; font-size:19px; margin-bottom:8px; }
+  .amount{ font-family:'Source Serif 4',serif; font-size:54px; font-weight:600; margin:18px 0 4px; letter-spacing:-0.02em; }
+  .amount span{ font-size:15px; color:var(--slate); font-family:'Inter',sans-serif; }
+  .price-card ul{ list-style:none; text-align:left; margin:30px 0; display:flex; flex-direction:column; gap:12px; }
+  .price-card li{ font-size:13.5px; color:var(--ink); display:flex; gap:10px; }
+  .price-card li::before{ content:'✓'; color:var(--amber); font-weight:700; }
+  .price-card .btn{ width:100%; justify-content:center; padding:14px; }
+
+  .faq{ max-width:660px; margin:0 auto; }
+  .faq-item{ border-bottom:1px solid var(--line); padding:22px 0; }
+  .faq-item:last-child{ border-bottom:none; }
+  .faq-item h4{ font-size:14.5px; font-weight:600; margin-bottom:7px; }
+  .faq-item p{ font-size:13.5px; color:var(--slate); line-height:1.6; }
+
+  footer{ border-top:1px solid var(--line); padding:36px 0; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--slate); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+  }
+  @media (max-width:860px){
+    .hero{ grid-template-columns:1fr; padding:64px 0 48px; text-align:left; }
+    .features{ grid-template-columns:1fr; }
+    nav ul{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="tag">R/00</span> <span class="wordmark">CV<span class="four">4</span>ME</span></div>
+    <nav><ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul></nav>
+    <a class="btn" href="app.html">Start a resume — $1</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">$1 per resume · No subscription</div>
+      <div class="wordmark-lg">CV<span class="four">4</span>ME</div>
+      <h1 style="font-size:clamp(22px,2.6vw,28px); margin-top:14px; font-weight:500; color:var(--slate);">A resume, <em>typeset</em> properly.</h1>
+      <p class="sub">Fill in a form, watch a real document come together beside it, print or save as a PDF that looks like it came from a print shop — not a template site.</p>
+      <div class="hero-cta">
+        <a class="btn" href="app.html">Start a resume — $1</a>
+        <span class="price-note">pay once per resume, no account</span>
+      </div>
+    </div>
+    <div class="paper-stage">
+      <div class="paper">
+        <div class="pname">Jordan Ellis</div>
+        <div class="ptitle">Product Designer</div>
+        <div class="pmeta">jordan@email.com · Portland, OR</div>
+        <div class="plabel">Experience</div>
+        <div class="prole">Senior Product Designer — Northbeam</div>
+        <div class="pline">Led redesign of onboarding flow, lifting activation 18%</div>
+        <div class="pline">Built and maintained the design system</div>
+      </div>
+      <div class="tag-chip">Live preview →</div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-head"><span class="n">01</span><h2>What you get</h2><div class="rule"></div></div>
+    <div class="features">
+      <div class="feature">
+        <div class="fn">A</div>
+        <h3>Live document, not a form</h3>
+        <p>Every field updates an actual formatted page in real time, so you're always looking at the resume you'll send, not a preview of one.</p>
+      </div>
+      <div class="feature">
+        <div class="fn">B</div>
+        <h3>Print-ready output</h3>
+        <p>One click produces a clean, correctly margined PDF — built to survive both a human reader and an applicant tracking system.</p>
+      </div>
+      <div class="feature">
+        <div class="fn">C</div>
+        <h3>No account required</h3>
+        <p>Pay once per resume, get access. Nothing to log into, nothing stored on a server.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="section-head"><span class="n">02</span><h2>Pricing</h2><div class="rule"></div></div>
+    <div class="pricing">
+      <div class="price-card">
+        <span class="n">R/02</span>
+        <h3>CV4ME — Per resume</h3>
+        <div class="amount">$1 <span>per resume</span></div>
+        <ul>
+          <li>Unlimited edits on that resume</li>
+          <li>Print / PDF export</li>
+          <li>No account, no subscription</li>
+          <li>Pay again only when you start a new one</li>
+        </ul>
+        <a class="btn" href="app.html">Start a resume — $1</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="section-head"><span class="n">03</span><h2>Questions</h2><div class="rule"></div></div>
+    <div class="faq">
+      <div class="faq-item">
+        <h4>How does the $1 work?</h4>
+        <p>You pay once when you click "Start a resume." That unlocks the editor for that resume — as many edits and PDF exports as you want. Starting a different resume is a separate $1.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Is my resume data stored anywhere?</h4>
+        <p>No — everything happens in your browser. Nothing you type is sent to a server.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Can I get a refund?</h4>
+        <p>Yes, within 14 days if it's not a fit — just reply to your receipt email.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 CV4ME</span>
+    <span>Built for people who'd rather write than format.</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CV4ME — Resume Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#F0EEE9; font-family:'Inter',system-ui,sans-serif; color:#1B2430; }
+  .ui-font{ font-family:'Inter',system-ui,sans-serif; }
+  .paper-font{ font-family:'Source Serif 4', Georgia, serif; }
+  input,textarea{ font-family:inherit; }
+  @media print {
+    body * { visibility:hidden; }
+    #paper, #paper * { visibility:visible; }
+    #paper{ position:absolute; top:0; left:0; width:100%; box-shadow:none !important; margin:0 !important; }
+    #no-print{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+const emptyExp = () => ({ id: uid(), role: "", company: "", start: "", end: "", bullets: [""] });
+const emptyEdu = () => ({ id: uid(), school: "", degree: "", start: "", end: "" });
+
+const initialState = {
+  name: "", title: "", email: "", phone: "", location: "", link: "",
+  summary: "", experience: [emptyExp()], education: [emptyEdu()], skills: "",
+};
+
+function Field({ label, ...props }) {
+  return (
+    <label style={{display:"block"}}>
+      <span style={{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4}}>{label}</span>
+      <input {...props} style={{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524"}} />
+    </label>
+  );
+}
+function TextArea({ label, ...props }) {
+  return (
+    <label style={{display:"block"}}>
+      <span style={{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4}}>{label}</span>
+      <textarea {...props} style={{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524",resize:"none"}} />
+    </label>
+  );
+}
+function SectionLabel({ n, children }) {
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:8,margin:"28px 0 12px"}}>
+      <span style={{fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:"rgba(180,131,60,0.8)"}}>{n}</span>
+      <h2 style={{fontSize:12,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#57534e",margin:0}}>{children}</h2>
+      <div style={{height:1,flex:1,background:"#e7e5e0"}} />
+    </div>
+  );
+}
+
+function Paywall({ onStart, loading }) {
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:24,textAlign:"center"}}>
+      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#B4833C",letterSpacing:"0.1em",textTransform:"uppercase"}}>R/01 · <span style={{fontWeight:800,color:"#191F29"}}>CV<span style={{color:"#B4833C"}}>4</span>ME</span></div>
+      <h1 className="paper-font" style={{fontSize:32,fontWeight:600,margin:0}}>Start a new resume</h1>
+      <p style={{color:"#78716c",maxWidth:360,fontSize:14,margin:0}}>Each resume is $1, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume.</p>
+      <button onClick={onStart} disabled={loading} style={{marginTop:8,background:"#1c1917",color:"#fafaf9",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:600,cursor:loading?"default":"pointer",opacity:loading?0.6:1}}>
+        {loading ? "Redirecting to checkout…" : "Start new resume — $1"}
+      </button>
+    </div>
+  );
+}
+
+function App() {
+  const [data, setData] = useState(initialState);
+  const [paid, setPaid] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [startingCheckout, setStartingCheckout] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get("session_id");
+    if (sid) {
+      fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`)
+        .then((r) => r.json())
+        .then((d) => { setPaid(!!d.paid); setChecking(false); })
+        .catch(() => setChecking(false));
+    } else {
+      setChecking(false);
+    }
+  }, []);
+
+  const startCheckout = async () => {
+    setStartingCheckout(true);
+    try {
+      const res = await fetch("/api/create-checkout-session", { method: "POST" });
+      const d = await res.json();
+      if (d.url) { window.location.href = d.url; return; }
+    } catch (e) {}
+    setStartingCheckout(false);
+  };
+
+  const set = (k, v) => setData((d) => ({ ...d, [k]: v }));
+  const updateExp = (id, patch) => setData((d) => ({ ...d, experience: d.experience.map((e) => (e.id === id ? { ...e, ...patch } : e)) }));
+  const updateBullet = (expId, i, val) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: e.bullets.map((b, bi) => (bi === i ? val : b)) } : e) }));
+  const addBullet = (expId) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: [...e.bullets, ""] } : e) }));
+  const removeBullet = (expId, i) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: e.bullets.filter((_, bi) => bi !== i) } : e) }));
+  const addExp = () => setData((d) => ({ ...d, experience: [...d.experience, emptyExp()] }));
+  const removeExp = (id) => setData((d) => ({ ...d, experience: d.experience.filter((e) => e.id !== id) }));
+  const updateEdu = (id, patch) => setData((d) => ({ ...d, education: d.education.map((e) => (e.id === id ? { ...e, ...patch } : e)) }));
+  const addEdu = () => setData((d) => ({ ...d, education: [...d.education, emptyEdu()] }));
+  const removeEdu = (id) => setData((d) => ({ ...d, education: d.education.filter((e) => e.id !== id) }));
+  const handlePrint = () => window.print();
+  const skillList = data.skills.split(",").map((s) => s.trim()).filter(Boolean);
+
+  if (checking) {
+    return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#78716c",fontSize:14}}>Checking payment…</div>;
+  }
+  if (!paid) {
+    return <Paywall onStart={startCheckout} loading={startingCheckout} />;
+  }
+
+  return (
+    <div>
+      <div id="no-print" style={{borderBottom:"1px solid #e7e5e0",background:"rgba(250,249,247,0.9)",position:"sticky",top:0,zIndex:10}}>
+        <div style={{maxWidth:1120,margin:"0 auto",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontWeight:800,fontSize:15,letterSpacing:"-0.02em"}}><span style={{fontFamily:"'JetBrains Mono',monospace",color:"#B4833C",fontSize:11,marginRight:8,fontWeight:500}}>R/01</span>CV<span style={{color:"#B4833C"}}>4</span>ME</div>
+          <button onClick={handlePrint} style={{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"}}>Print / Save as PDF</button>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1120,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1.15fr",gap:32,padding:"28px 24px"}}>
+        <div id="no-print">
+          <SectionLabel n="01">Identity</SectionLabel>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Field label="Full name" value={data.name} onChange={(e)=>set("name",e.target.value)} />
+            <Field label="Title" value={data.title} onChange={(e)=>set("title",e.target.value)} />
+            <Field label="Email" value={data.email} onChange={(e)=>set("email",e.target.value)} />
+            <Field label="Phone" value={data.phone} onChange={(e)=>set("phone",e.target.value)} />
+            <Field label="Location" value={data.location} onChange={(e)=>set("location",e.target.value)} />
+            <Field label="Link" value={data.link} onChange={(e)=>set("link",e.target.value)} />
+          </div>
+
+          <SectionLabel n="02">Summary</SectionLabel>
+          <TextArea rows={3} value={data.summary} onChange={(e)=>set("summary",e.target.value)} label="Two or three sentences" />
+
+          <SectionLabel n="03">Experience</SectionLabel>
+          {data.experience.map((exp) => (
+            <div key={exp.id} style={{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:14}}>
+              <div style={{display:"flex",gap:8}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1}}>
+                  <Field label="Role" value={exp.role} onChange={(e)=>updateExp(exp.id,{role:e.target.value})} />
+                  <Field label="Company" value={exp.company} onChange={(e)=>updateExp(exp.id,{company:e.target.value})} />
+                  <Field label="Start" value={exp.start} onChange={(e)=>updateExp(exp.id,{start:e.target.value})} />
+                  <Field label="End" value={exp.end} onChange={(e)=>updateExp(exp.id,{end:e.target.value})} />
+                </div>
+                <button onClick={()=>removeExp(exp.id)} style={{background:"none",border:"none",color:"#a8a29e",cursor:"pointer",alignSelf:"flex-start",marginTop:20}}>✕</button>
+              </div>
+              <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
+                {exp.bullets.map((b,i)=>(
+                  <div key={i} style={{display:"flex",gap:6,alignItems:"center"}}>
+                    <input value={b} placeholder="What did you do, and what changed?" onChange={(e)=>updateBullet(exp.id,i,e.target.value)} style={{flex:1,border:"1px solid #e7e5e0",background:"#fafaf9",borderRadius:6,padding:"6px 8px",fontSize:13}} />
+                    <button onClick={()=>removeBullet(exp.id,i)} style={{background:"none",border:"none",color:"#d6d3ce",cursor:"pointer"}}>✕</button>
+                  </div>
+                ))}
+                <button onClick={()=>addBullet(exp.id)} style={{background:"none",border:"none",color:"#B4833C",fontSize:12,fontWeight:600,cursor:"pointer",textAlign:"left",padding:0}}>+ Add line</button>
+              </div>
+            </div>
+          ))}
+          <button onClick={addExp} style={{background:"none",border:"none",color:"#44403c",fontSize:13,fontWeight:600,cursor:"pointer",padding:0}}>+ Add position</button>
+
+          <SectionLabel n="04">Education</SectionLabel>
+          {data.education.map((edu) => (
+            <div key={edu.id} style={{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:10,display:"flex",gap:8}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1}}>
+                <Field label="School" value={edu.school} onChange={(e)=>updateEdu(edu.id,{school:e.target.value})} />
+                <Field label="Degree" value={edu.degree} onChange={(e)=>updateEdu(edu.id,{degree:e.target.value})} />
+                <Field label="Start" value={edu.start} onChange={(e)=>updateEdu(edu.id,{start:e.target.value})} />
+                <Field label="End" value={edu.end} onChange={(e)=>updateEdu(edu.id,{end:e.target.value})} />
+              </div>
+              <button onClick={()=>removeEdu(edu.id)} style={{background:"none",border:"none",color:"#a8a29e",cursor:"pointer",alignSelf:"flex-start",marginTop:20}}>✕</button>
+            </div>
+          ))}
+          <button onClick={addEdu} style={{background:"none",border:"none",color:"#44403c",fontSize:13,fontWeight:600,cursor:"pointer",padding:0}}>+ Add school</button>
+
+          <SectionLabel n="05">Skills</SectionLabel>
+          <TextArea rows={2} value={data.skills} onChange={(e)=>set("skills",e.target.value)} label="Comma separated" />
+          <div style={{height:24}} />
+        </div>
+
+        <div style={{position:"sticky",top:80,alignSelf:"flex-start"}}>
+          <div id="paper" className="paper-font" style={{background:"#fff",boxShadow:"0 2px 20px rgba(0,0,0,0.09)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16}}>
+              <div>
+                <div style={{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1}}>{data.name || "Your Name"}</div>
+                <div style={{fontSize:14,color:"#B4833C",marginTop:4}}>{data.title}</div>
+              </div>
+            </div>
+            <div className="ui-font" style={{fontSize:11,color:"#78716c",display:"flex",flexWrap:"wrap",gap:"2px 12px",marginBottom:20}}>
+              {[data.email,data.phone,data.location,data.link].filter(Boolean).map((v,i)=>(<span key={i}>{v}</span>))}
+            </div>
+            {data.summary && <p style={{fontSize:13,lineHeight:1.6,color:"#44403c",marginBottom:20}}>{data.summary}</p>}
+            {data.experience.some(e=>e.role||e.company) && (
+              <div style={{marginBottom:20}}>
+                <div className="ui-font" style={{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10}}>Experience</div>
+                {data.experience.map((exp)=>(
+                  <div key={exp.id} style={{marginBottom:14}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+                      <div style={{fontSize:14,fontWeight:600}}>{exp.role} {exp.company && <span style={{fontWeight:400,color:"#57534e"}}>— {exp.company}</span>}</div>
+                      <div className="ui-font" style={{fontSize:10.5,color:"#a8a29e",marginLeft:8}}>{exp.start}{exp.end?` – ${exp.end}`:""}</div>
+                    </div>
+                    <ul style={{marginTop:4,paddingLeft:0,listStyle:"none"}}>
+                      {exp.bullets.filter(Boolean).map((b,i)=>(<li key={i} style={{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2}}><span style={{position:"absolute",left:0,color:"#B4833C"}}>—</span>{b}</li>))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+            {data.education.some(e=>e.school) && (
+              <div style={{marginBottom:20}}>
+                <div className="ui-font" style={{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10}}>Education</div>
+                {data.education.map((edu)=>(
+                  <div key={edu.id} style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                    <div style={{fontSize:13}}>{edu.school}{edu.degree && <span style={{color:"#78716c"}}> — {edu.degree}</span>}</div>
+                    <div className="ui-font" style={{fontSize:10.5,color:"#a8a29e"}}>{edu.start}{edu.end?` – ${edu.end}`:""}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {skillList.length>0 && (
+              <div>
+                <div className="ui-font" style={{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10}}>Skills</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                  {skillList.map((s,i)=>(<span key={i} className="ui-font" style={{fontSize:11,background:"#f5f4f1",borderRadius:4,padding:"3px 8px"}}>{s}</span>))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
