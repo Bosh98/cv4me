@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CV4ME — Resume Builder</title>
-  <link rel="canonical" href="https://www.cv4me.io/app.html" />
+<link rel="canonical" href="https://www.cv4me.io/app.html" />
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -108,15 +108,34 @@ function Paywall({ onStart, loading }) {
   );
 }
 
+const demoData = {
+  name: "Jordan Ellis", title: "Product Designer", email: "jordan@email.com",
+  phone: "(555) 019-2244", location: "Portland, OR", link: "jordanellis.design",
+  summary: "Product designer with 6 years shaping consumer software, from early prototypes to shipped systems used by millions.",
+  experience: [{
+    id: uid(), role: "Senior Product Designer", company: "Northbeam", start: "2022", end: "Present",
+    bullets: ["Led redesign of onboarding flow, lifting activation 18%", "Built and maintained the company's design system"]
+  }],
+  education: [{ id: uid(), school: "Rhode Island School of Design", degree: "BFA, Graphic Design", start: "2015", end: "2019" }],
+  skills: "Figma, Prototyping, Design Systems, User Research, HTML/CSS",
+};
+
 function App() {
   const [data, setData] = useState(initialState);
   const [paid, setPaid] = useState(false);
   const [checking, setChecking] = useState(true);
   const [verifyError, setVerifyError] = useState(false);
   const [startingCheckout, setStartingCheckout] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
 
   const restoreSavedData = () => {
     try {
+      const demoCarry = localStorage.getItem("cv4me_demo_data");
+      if (demoCarry) {
+        setData(JSON.parse(demoCarry));
+        localStorage.removeItem("cv4me_demo_data");
+        return;
+      }
       const saved = localStorage.getItem("cv4me_data");
       if (saved) setData(JSON.parse(saved));
     } catch (e) {}
@@ -162,6 +181,9 @@ function App() {
       if (existingSid) {
         restoreSavedData();
         setPaid(true);
+      } else if (params.get("preview") === "1") {
+        setData(demoData);
+        setIsDemo(true);
       }
       setChecking(false);
     }
@@ -180,6 +202,11 @@ function App() {
       if (d.url) { window.location.href = d.url; return; }
     } catch (e) {}
     setStartingCheckout(false);
+  };
+
+  const unlockFromDemo = async () => {
+    try { localStorage.setItem("cv4me_demo_data", JSON.stringify(data)); } catch (e) {}
+    startCheckout();
   };
 
   const set = (k, v) => setData((d) => ({ ...d, [k]: v }));
@@ -234,12 +261,18 @@ function App() {
           h("span", { style:{fontFamily:"'JetBrains Mono',monospace",color:"#F2A93A",fontSize:11,marginRight:8,fontWeight:500} }, "R/01"),
           "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"
         ),
-        h("div", { style:{display:"flex",alignItems:"center"} },
-          h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:700,cursor:"pointer"} }, "Print / Save as PDF"),
-          h("button", { className:"btn-secondary", onClick:startNewResume, style:{background:"transparent",color:"#A29B8C",border:"1px solid rgba(244,242,236,0.18)",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
+        h("div", { style:{display:"flex",alignItems:"center",gap:10} },
+          isDemo ? h("span", { className:"ui-font", style:{fontSize:12,color:"#A29B8C",display:"none"} }) : null,
+          isDemo
+            ? h("button", { className:"btn-primary", onClick:unlockFromDemo, disabled:startingCheckout, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 18px",borderRadius:6,fontSize:13,fontWeight:700,cursor:startingCheckout?"default":"pointer",opacity:startingCheckout?0.6:1} }, startingCheckout ? "Redirecting…" : "Unlock full export — $1.99")
+            : h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:700,cursor:"pointer"} }, "Print / Save as PDF"),
+          !isDemo ? h("button", { className:"btn-secondary", onClick:startNewResume, style:{background:"transparent",color:"#A29B8C",border:"1px solid rgba(244,242,236,0.18)",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "New resume") : null
         )
       )
     ),
+    isDemo ? h("div", { id:"no-print", style:{background:"rgba(242,169,58,0.08)",borderBottom:"1px solid rgba(242,169,58,0.2)",padding:"10px 24px",textAlign:"center"} },
+      h("span", { className:"ui-font", style:{fontSize:12.5,color:"#F2A93A"} }, "You're previewing with sample data — edit freely. Unlock to export your own resume as a PDF.")
+    ) : null,
     h("div", { className:"editor-grid" },
       h("div", { id:"no-print" },
         h(SectionLabel, { n:"01" }, "Identity"),
@@ -295,7 +328,8 @@ function App() {
         h("div", { style:{height:24} })
       ),
       h("div", { className:"preview-col" },
-        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto"} },
+        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto",position:"relative"} },
+          isDemo ? h("div", { className:"ui-font", style:{position:"absolute",top:16,right:16,background:"#F2A93A",color:"#171207",fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 10px",borderRadius:20} }, "Preview") : null,
           h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16} },
             h("div", null,
               h("div", { style:{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1,color:"#191A1D"} }, data.name || "Your Name"),
