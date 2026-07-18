@@ -172,6 +172,17 @@ function App() {
   const handlePrint = () => window.print();
   const skillList = data.skills.split(",").map((s) => s.trim()).filter(Boolean);
 
+  const startNewResume = () => {
+    if (!window.confirm("Start a new resume? Your current one will be cleared, and a new resume is another $1.")) return;
+    try {
+      localStorage.removeItem("cv4me_paid_sid");
+      localStorage.removeItem("cv4me_data");
+    } catch (e) {}
+    window.history.replaceState({}, "", window.location.pathname);
+    setData(initialState);
+    setPaid(false);
+  };
+
   if (checking) {
     return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#78716c",fontSize:14} }, "Checking payment…");
   }
@@ -199,7 +210,10 @@ function App() {
           h("span", { style:{fontFamily:"'JetBrains Mono',monospace",color:"#B4833C",fontSize:11,marginRight:8,fontWeight:500} }, "R/01"),
           "CV", h("span", { style:{color:"#B4833C"} }, "4"), "ME"
         ),
-        h("button", { onClick:handlePrint, style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "Print / Save as PDF")
+        h("div", { style:{display:"flex",alignItems:"center"} },
+          h("button", { onClick:handlePrint, style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "Print / Save as PDF"),
+          h("button", { onClick:startNewResume, style:{background:"transparent",color:"#78716c",border:"1px solid #d6d3ce",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
+        )
       )
     ),
     h("div", { style:{maxWidth:1120,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1.15fr",gap:32,padding:"28px 24px"} },
