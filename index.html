@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CV4ME — Resume Builder That Looks Expensive, Costs $1.99</title>
-  <link rel="canonical" href="https://www.cv4me.io/" />
+<link rel="canonical" href="https://www.cv4me.io/" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -62,7 +62,8 @@
   .paper .prole{ font-size:12px; font-weight:600; color:#232426; margin-bottom:3px; }
   .paper .pline{ font-size:10.5px; color:#6B655A; margin-bottom:4px; padding-left:11px; position:relative; }
   .paper .pline::before{ content:'—'; position:absolute; left:0; color:var(--amber-dim); }
-  .tag-chip{ position:absolute; background:var(--amber); color:#171207; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; padding:7px 12px; border-radius:20px; top:40%; right:-4px; box-shadow:var(--shadow-glow); }
+  .tag-chip{ position:absolute; background:var(--amber); color:#171207; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; padding:7px 12px; border-radius:20px; top:40%; right:-4px; box-shadow:var(--shadow-glow); cursor:pointer; transition:transform .2s var(--ease); }
+  .tag-chip:hover{ transform:scale(1.05); }
 
   section{ padding:88px 0; }
   .section-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:44px; }
@@ -143,7 +144,7 @@
         <div class="pline">Led redesign of onboarding flow, lifting activation 18%</div>
         <div class="pline">Built and maintained the design system</div>
       </div>
-      <div class="tag-chip">Live preview →</div>
+      <a href="app.html?preview=1" class="tag-chip">Live preview →</a>
     </div>
   </section>
 
