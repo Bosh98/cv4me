@@ -14,6 +14,23 @@
   .paper-font{ font-family:'Source Serif 4', Georgia, serif; }
   input,textarea{ font-family:inherit; }
   #load-fallback{ min-height:100vh; display:flex; align-items:center; justify-content:center; color:#78716c; font-size:14px; }
+  .editor-grid{ max-width:1120px; margin:0 auto; display:grid; grid-template-columns:1fr 1.15fr; gap:32px; padding:28px 24px; }
+  .preview-col{ position:sticky; top:80px; align-self:flex-start; }
+  .btn-primary{ transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease; }
+  .btn-primary:hover:not(:disabled){ transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.18); }
+  .btn-primary:active:not(:disabled){ transform:translateY(0); }
+  .btn-secondary{ transition:background .15s ease, border-color .15s ease; }
+  .btn-secondary:hover{ background:#f5f4f1; border-color:#a8a29e; }
+  .field-input{ transition:border-color .15s ease, box-shadow .15s ease; }
+  .field-input:focus{ outline:none; border-color:#B4833C !important; box-shadow:0 0 0 3px rgba(180,131,60,0.12); }
+  @media (max-width:860px){
+    .editor-grid{ grid-template-columns:1fr; padding:16px; gap:20px; }
+    .preview-col{ position:static; }
+    #paper{ padding:32px 24px !important; }
+  }
+  @media (max-width:420px){
+    .field-grid-2{ grid-template-columns:1fr !important; }
+  }
   @media print {
     body * { visibility:hidden; }
     #paper, #paper * { visibility:visible; }
@@ -52,14 +69,14 @@ const initialState = {
 function Field({ label, ...props }) {
   return h("label", { style:{display:"block"} },
     h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4} }, label),
-    h("input", Object.assign({}, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524"} }))
+    h("input", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524"} }))
   );
 }
 
 function TextArea({ label, ...props }) {
   return h("label", { style:{display:"block"} },
     h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4} }, label),
-    h("textarea", Object.assign({}, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524",resize:"none"} }))
+    h("textarea", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524",resize:"none"} }))
   );
 }
 
@@ -78,9 +95,9 @@ function Paywall({ onStart, loading }) {
       h("span", { style:{fontWeight:800,color:"#191F29"} }, "CV", h("span", { style:{color:"#B4833C"} }, "4"), "ME")
     ),
     h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0} }, "Start a new resume"),
-    h("p", { style:{color:"#78716c",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
-    h("button", { onClick:onStart, disabled:loading, style:{marginTop:8,background:"#1c1917",color:"#fafaf9",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:600,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
-      loading ? "Redirecting to checkout…" : "Start new resume — $1"
+    h("p", { style:{color:"#78716c",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
+    h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#1c1917",color:"#fafaf9",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:600,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
+      loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
     )
   );
 }
@@ -173,7 +190,7 @@ function App() {
   const skillList = data.skills.split(",").map((s) => s.trim()).filter(Boolean);
 
   const startNewResume = () => {
-    if (!window.confirm("Start a new resume? Your current one will be cleared, and a new resume is another $1.")) return;
+    if (!window.confirm("Start a new resume? Your current one will be cleared, and a new resume is another $1.99.")) return;
     try {
       localStorage.removeItem("cv4me_paid_sid");
       localStorage.removeItem("cv4me_data");
@@ -191,6 +208,7 @@ function App() {
       h("div", { style:{fontWeight:600,fontSize:16} }, "Couldn't confirm your payment"),
       h("p", { style:{color:"#78716c",fontSize:13,maxWidth:320,margin:0} }, "This is usually a brief connection hiccup. If you already paid, don't pay again — just retry."),
       h("button", {
+        className:"btn-primary",
         onClick: () => {
           const sid = new URLSearchParams(window.location.search).get("session_id");
           if (sid) verifySession(sid);
@@ -211,15 +229,15 @@ function App() {
           "CV", h("span", { style:{color:"#B4833C"} }, "4"), "ME"
         ),
         h("div", { style:{display:"flex",alignItems:"center"} },
-          h("button", { onClick:handlePrint, style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "Print / Save as PDF"),
-          h("button", { onClick:startNewResume, style:{background:"transparent",color:"#78716c",border:"1px solid #d6d3ce",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
+          h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "Print / Save as PDF"),
+          h("button", { className:"btn-secondary", onClick:startNewResume, style:{background:"transparent",color:"#78716c",border:"1px solid #d6d3ce",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
         )
       )
     ),
-    h("div", { style:{maxWidth:1120,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1.15fr",gap:32,padding:"28px 24px"} },
+    h("div", { className:"editor-grid" },
       h("div", { id:"no-print" },
         h(SectionLabel, { n:"01" }, "Identity"),
-        h("div", { style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10} },
+        h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10} },
           h(Field, { label:"Full name", value:data.name, onChange:(e)=>set("name",e.target.value) }),
           h(Field, { label:"Title", value:data.title, onChange:(e)=>set("title",e.target.value) }),
           h(Field, { label:"Email", value:data.email, onChange:(e)=>set("email",e.target.value) }),
@@ -233,7 +251,7 @@ function App() {
         data.experience.map((exp) =>
           h("div", { key:exp.id, style:{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:14} },
             h("div", { style:{display:"flex",gap:8} },
-              h("div", { style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
+              h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
                 h(Field, { label:"Role", value:exp.role, onChange:(e)=>updateExp(exp.id,{role:e.target.value}) }),
                 h(Field, { label:"Company", value:exp.company, onChange:(e)=>updateExp(exp.id,{company:e.target.value}) }),
                 h(Field, { label:"Start", value:exp.start, onChange:(e)=>updateExp(exp.id,{start:e.target.value}) }),
@@ -256,7 +274,7 @@ function App() {
         h(SectionLabel, { n:"04" }, "Education"),
         data.education.map((edu) =>
           h("div", { key:edu.id, style:{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:10,display:"flex",gap:8} },
-            h("div", { style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
+            h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
               h(Field, { label:"School", value:edu.school, onChange:(e)=>updateEdu(edu.id,{school:e.target.value}) }),
               h(Field, { label:"Degree", value:edu.degree, onChange:(e)=>updateEdu(edu.id,{degree:e.target.value}) }),
               h(Field, { label:"Start", value:edu.start, onChange:(e)=>updateEdu(edu.id,{start:e.target.value}) }),
@@ -270,7 +288,7 @@ function App() {
         h(TextArea, { rows:2, value:data.skills, onChange:(e)=>set("skills",e.target.value), label:"Comma separated" }),
         h("div", { style:{height:24} })
       ),
-      h("div", { style:{position:"sticky",top:80,alignSelf:"flex-start"} },
+      h("div", { className:"preview-col" },
         h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 2px 20px rgba(0,0,0,0.09)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto"} },
           h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16} },
             h("div", null,
