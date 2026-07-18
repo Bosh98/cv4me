@@ -89,20 +89,65 @@ function App() {
   const [data, setData] = useState(initialState);
   const [paid, setPaid] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [verifyError, setVerifyError] = useState(false);
   const [startingCheckout, setStartingCheckout] = useState(false);
+
+  const restoreSavedData = () => {
+    try {
+      const saved = localStorage.getItem("cv4me_data");
+      if (saved) setData(JSON.parse(saved));
+    } catch (e) {}
+  };
+
+  const verifySession = (sid) => {
+    setChecking(true);
+    setVerifyError(false);
+    fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.paid) {
+          try { localStorage.setItem("cv4me_paid_sid", sid); } catch (e) {}
+          restoreSavedData();
+          setPaid(true);
+        } else {
+          setPaid(false);
+        }
+        setChecking(false);
+      })
+      .catch(() => {
+        let previouslyPaid = false;
+        try { previouslyPaid = localStorage.getItem("cv4me_paid_sid") === sid; } catch (e) {}
+        if (previouslyPaid) {
+          restoreSavedData();
+          setPaid(true);
+          setChecking(false);
+        } else {
+          setVerifyError(true);
+          setChecking(false);
+        }
+      });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("session_id");
     if (sid) {
-      fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`)
-        .then((r) => r.json())
-        .then((d) => { setPaid(!!d.paid); setChecking(false); })
-        .catch(() => setChecking(false));
+      verifySession(sid);
     } else {
+      let existingSid = null;
+      try { existingSid = localStorage.getItem("cv4me_paid_sid"); } catch (e) {}
+      if (existingSid) {
+        restoreSavedData();
+        setPaid(true);
+      }
       setChecking(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!paid) return;
+    try { localStorage.setItem("cv4me_data", JSON.stringify(data)); } catch (e) {}
+  }, [data, paid]);
 
   const startCheckout = async () => {
     setStartingCheckout(true);
@@ -129,6 +174,19 @@ function App() {
 
   if (checking) {
     return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#78716c",fontSize:14} }, "Checking payment…");
+  }
+  if (verifyError) {
+    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,padding:24,textAlign:"center"} },
+      h("div", { style:{fontWeight:600,fontSize:16} }, "Couldn't confirm your payment"),
+      h("p", { style:{color:"#78716c",fontSize:13,maxWidth:320,margin:0} }, "This is usually a brief connection hiccup. If you already paid, don't pay again — just retry."),
+      h("button", {
+        onClick: () => {
+          const sid = new URLSearchParams(window.location.search).get("session_id");
+          if (sid) verifySession(sid);
+        },
+        style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"11px 20px",borderRadius:6,fontSize:14,fontWeight:600,cursor:"pointer"}
+      }, "Retry")
+    );
   }
   if (!paid) {
     return h(Paywall, { onStart: startCheckout, loading: startingCheckout });
