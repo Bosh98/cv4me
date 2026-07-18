@@ -4,25 +4,30 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CV4ME — Resume Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
+  :root{
+    --ink:#0C0D10; --ink-card:#1B1E24; --ink-input:#22252B;
+    --paper:#F4F2EC; --amber:#F2A93A; --amber-dim:#B87F1E; --slate:#A29B8C;
+    --line:rgba(244,242,236,0.12);
+  }
   *{box-sizing:border-box;}
-  body{ margin:0; background:#F0EEE9; font-family:'Inter',system-ui,sans-serif; color:#1B2430; }
-  .ui-font{ font-family:'Inter',system-ui,sans-serif; }
+  body{ margin:0; background:var(--ink); font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--paper); }
+  .ui-font{ font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
   .paper-font{ font-family:'Source Serif 4', Georgia, serif; }
   input,textarea{ font-family:inherit; }
-  #load-fallback{ min-height:100vh; display:flex; align-items:center; justify-content:center; color:#78716c; font-size:14px; }
+  #load-fallback{ min-height:100vh; display:flex; align-items:center; justify-content:center; color:var(--slate); font-size:14px; }
   .editor-grid{ max-width:1120px; margin:0 auto; display:grid; grid-template-columns:1fr 1.15fr; gap:32px; padding:28px 24px; }
   .preview-col{ position:sticky; top:80px; align-self:flex-start; }
   .btn-primary{ transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease; }
-  .btn-primary:hover:not(:disabled){ transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,0.18); }
+  .btn-primary:hover:not(:disabled){ transform:translateY(-1px); box-shadow:0 10px 24px -6px rgba(242,169,58,.4); }
   .btn-primary:active:not(:disabled){ transform:translateY(0); }
   .btn-secondary{ transition:background .15s ease, border-color .15s ease; }
-  .btn-secondary:hover{ background:#f5f4f1; border-color:#a8a29e; }
+  .btn-secondary:hover{ background:rgba(244,242,236,0.06); border-color:rgba(244,242,236,0.3); }
   .field-input{ transition:border-color .15s ease, box-shadow .15s ease; }
-  .field-input:focus{ outline:none; border-color:#B4833C !important; box-shadow:0 0 0 3px rgba(180,131,60,0.12); }
+  .field-input:focus{ outline:none; border-color:var(--amber) !important; box-shadow:0 0 0 3px rgba(242,169,58,0.18); }
   @media (max-width:860px){
     .editor-grid{ grid-template-columns:1fr; padding:16px; gap:20px; }
     .preview-col{ position:static; }
@@ -45,8 +50,8 @@
   setTimeout(function(){
     if (typeof React === "undefined") {
       document.getElementById("root").innerHTML =
-        '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:24px;text-align:center;font-family:sans-serif;color:#78716c;">' +
-        '<div style="font-weight:600;color:#1B2430;">Couldn\'t load the app</div>' +
+        '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:24px;text-align:center;font-family:sans-serif;color:#A29B8C;background:#0C0D10;">' +
+        '<div style="font-weight:700;color:#F4F2EC;">Couldn\'t load the app</div>' +
         '<div style="font-size:13px;max-width:320px;">A required script failed to load. Try switching from wifi to mobile data (or the reverse), or check if a VPN/ad blocker is active.</div>' +
         '</div>';
     }
@@ -68,35 +73,35 @@ const initialState = {
 
 function Field({ label, ...props }) {
   return h("label", { style:{display:"block"} },
-    h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4} }, label),
-    h("input", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524"} }))
+    h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#A29B8C",textTransform:"uppercase",marginBottom:4} }, label),
+    h("input", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid rgba(244,242,236,0.16)",background:"#22252B",padding:"8px 10px",fontSize:14,color:"#F4F2EC"} }))
   );
 }
 
 function TextArea({ label, ...props }) {
   return h("label", { style:{display:"block"} },
-    h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#78716c",textTransform:"uppercase",marginBottom:4} }, label),
-    h("textarea", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid #d6d3ce",background:"#fff",padding:"8px 10px",fontSize:14,color:"#292524",resize:"none"} }))
+    h("span", { style:{display:"block",fontSize:11,fontWeight:600,letterSpacing:"0.03em",color:"#A29B8C",textTransform:"uppercase",marginBottom:4} }, label),
+    h("textarea", Object.assign({ className:"field-input" }, props, { style:{width:"100%",borderRadius:6,border:"1px solid rgba(244,242,236,0.16)",background:"#22252B",padding:"8px 10px",fontSize:14,color:"#F4F2EC",resize:"none"} }))
   );
 }
 
 function SectionLabel({ n, children }) {
   return h("div", { style:{display:"flex",alignItems:"center",gap:8,margin:"28px 0 12px"} },
-    h("span", { style:{fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:"rgba(180,131,60,0.8)"} }, n),
-    h("h2", { style:{fontSize:12,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#57534e",margin:0} }, children),
-    h("div", { style:{height:1,flex:1,background:"#e7e5e0"} })
+    h("span", { style:{fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:"#F2A93A"} }, n),
+    h("h2", { style:{fontSize:12,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#F4F2EC",margin:0} }, children),
+    h("div", { style:{height:1,flex:1,background:"rgba(244,242,236,0.12)"} })
   );
 }
 
 function Paywall({ onStart, loading }) {
   return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:24,textAlign:"center"} },
-    h("div", { style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#B4833C",letterSpacing:"0.1em",textTransform:"uppercase"} },
+    h("div", { style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#F2A93A",letterSpacing:"0.1em",textTransform:"uppercase"} },
       "R/01 · ",
-      h("span", { style:{fontWeight:800,color:"#191F29"} }, "CV", h("span", { style:{color:"#B4833C"} }, "4"), "ME")
+      h("span", { style:{fontWeight:800,color:"#F4F2EC"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME")
     ),
-    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0} }, "Start a new resume"),
-    h("p", { style:{color:"#78716c",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
-    h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#1c1917",color:"#fafaf9",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:600,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
+    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),
+    h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
+    h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
     )
   );
@@ -201,19 +206,19 @@ function App() {
   };
 
   if (checking) {
-    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#78716c",fontSize:14} }, "Checking payment…");
+    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#A29B8C",fontSize:14} }, "Checking payment…");
   }
   if (verifyError) {
     return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,padding:24,textAlign:"center"} },
-      h("div", { style:{fontWeight:600,fontSize:16} }, "Couldn't confirm your payment"),
-      h("p", { style:{color:"#78716c",fontSize:13,maxWidth:320,margin:0} }, "This is usually a brief connection hiccup. If you already paid, don't pay again — just retry."),
+      h("div", { style:{fontWeight:700,fontSize:16,color:"#F4F2EC"} }, "Couldn't confirm your payment"),
+      h("p", { style:{color:"#A29B8C",fontSize:13,maxWidth:320,margin:0} }, "This is usually a brief connection hiccup. If you already paid, don't pay again — just retry."),
       h("button", {
         className:"btn-primary",
         onClick: () => {
           const sid = new URLSearchParams(window.location.search).get("session_id");
           if (sid) verifySession(sid);
         },
-        style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"11px 20px",borderRadius:6,fontSize:14,fontWeight:600,cursor:"pointer"}
+        style:{background:"#F2A93A",color:"#171207",border:"none",padding:"11px 20px",borderRadius:6,fontSize:14,fontWeight:700,cursor:"pointer"}
       }, "Retry")
     );
   }
@@ -222,15 +227,15 @@ function App() {
   }
 
   return h("div", null,
-    h("div", { id:"no-print", style:{borderBottom:"1px solid #e7e5e0",background:"rgba(250,249,247,0.9)",position:"sticky",top:0,zIndex:10} },
+    h("div", { id:"no-print", style:{borderBottom:"1px solid rgba(244,242,236,0.12)",background:"rgba(12,13,16,0.85)",position:"sticky",top:0,zIndex:10} },
       h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"} },
         h("div", { style:{fontWeight:800,fontSize:15,letterSpacing:"-0.02em"} },
-          h("span", { style:{fontFamily:"'JetBrains Mono',monospace",color:"#B4833C",fontSize:11,marginRight:8,fontWeight:500} }, "R/01"),
-          "CV", h("span", { style:{color:"#B4833C"} }, "4"), "ME"
+          h("span", { style:{fontFamily:"'JetBrains Mono',monospace",color:"#F2A93A",fontSize:11,marginRight:8,fontWeight:500} }, "R/01"),
+          "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"
         ),
         h("div", { style:{display:"flex",alignItems:"center"} },
-          h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#1c1917",color:"#fafaf9",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer"} }, "Print / Save as PDF"),
-          h("button", { className:"btn-secondary", onClick:startNewResume, style:{background:"transparent",color:"#78716c",border:"1px solid #d6d3ce",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
+          h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:700,cursor:"pointer"} }, "Print / Save as PDF"),
+          h("button", { className:"btn-secondary", onClick:startNewResume, style:{background:"transparent",color:"#A29B8C",border:"1px solid rgba(244,242,236,0.18)",padding:"8px 14px",borderRadius:6,fontSize:13,fontWeight:600,cursor:"pointer",marginLeft:8} }, "New resume")
         )
       )
     ),
@@ -249,7 +254,7 @@ function App() {
         h(TextArea, { rows:3, value:data.summary, onChange:(e)=>set("summary",e.target.value), label:"Two or three sentences" }),
         h(SectionLabel, { n:"03" }, "Experience"),
         data.experience.map((exp) =>
-          h("div", { key:exp.id, style:{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:14} },
+          h("div", { key:exp.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:14} },
             h("div", { style:{display:"flex",gap:8} },
               h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
                 h(Field, { label:"Role", value:exp.role, onChange:(e)=>updateExp(exp.id,{role:e.target.value}) }),
@@ -257,43 +262,43 @@ function App() {
                 h(Field, { label:"Start", value:exp.start, onChange:(e)=>updateExp(exp.id,{start:e.target.value}) }),
                 h(Field, { label:"End", value:exp.end, onChange:(e)=>updateExp(exp.id,{end:e.target.value}) })
               ),
-              h("button", { onClick:()=>removeExp(exp.id), style:{background:"none",border:"none",color:"#a8a29e",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
+              h("button", { onClick:()=>removeExp(exp.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
             ),
             h("div", { style:{marginTop:10,display:"flex",flexDirection:"column",gap:6} },
               exp.bullets.map((b,i) =>
                 h("div", { key:i, style:{display:"flex",gap:6,alignItems:"center"} },
-                  h("input", { value:b, placeholder:"What did you do, and what changed?", onChange:(e)=>updateBullet(exp.id,i,e.target.value), style:{flex:1,border:"1px solid #e7e5e0",background:"#fafaf9",borderRadius:6,padding:"6px 8px",fontSize:13} }),
-                  h("button", { onClick:()=>removeBullet(exp.id,i), style:{background:"none",border:"none",color:"#d6d3ce",cursor:"pointer"} }, "✕")
+                  h("input", { className:"field-input", value:b, placeholder:"What did you do, and what changed?", onChange:(e)=>updateBullet(exp.id,i,e.target.value), style:{flex:1,border:"1px solid rgba(244,242,236,0.12)",background:"#22252B",color:"#F4F2EC",borderRadius:6,padding:"6px 8px",fontSize:13} }),
+                  h("button", { onClick:()=>removeBullet(exp.id,i), style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
                 )
               ),
-              h("button", { onClick:()=>addBullet(exp.id), style:{background:"none",border:"none",color:"#B4833C",fontSize:12,fontWeight:600,cursor:"pointer",textAlign:"left",padding:0} }, "+ Add line")
+              h("button", { onClick:()=>addBullet(exp.id), style:{background:"none",border:"none",color:"#F2A93A",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"left",padding:0} }, "+ Add line")
             )
           )
         ),
-        h("button", { onClick:addExp, style:{background:"none",border:"none",color:"#44403c",fontSize:13,fontWeight:600,cursor:"pointer",padding:0} }, "+ Add position"),
+        h("button", { onClick:addExp, style:{background:"none",border:"none",color:"#F4F2EC",fontSize:13,fontWeight:700,cursor:"pointer",padding:0} }, "+ Add position"),
         h(SectionLabel, { n:"04" }, "Education"),
         data.education.map((edu) =>
-          h("div", { key:edu.id, style:{border:"1px solid #e7e5e0",borderRadius:8,background:"#fff",padding:14,marginBottom:10,display:"flex",gap:8} },
+          h("div", { key:edu.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:10,display:"flex",gap:8} },
             h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
               h(Field, { label:"School", value:edu.school, onChange:(e)=>updateEdu(edu.id,{school:e.target.value}) }),
               h(Field, { label:"Degree", value:edu.degree, onChange:(e)=>updateEdu(edu.id,{degree:e.target.value}) }),
               h(Field, { label:"Start", value:edu.start, onChange:(e)=>updateEdu(edu.id,{start:e.target.value}) }),
               h(Field, { label:"End", value:edu.end, onChange:(e)=>updateEdu(edu.id,{end:e.target.value}) })
             ),
-            h("button", { onClick:()=>removeEdu(edu.id), style:{background:"none",border:"none",color:"#a8a29e",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
+            h("button", { onClick:()=>removeEdu(edu.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
           )
         ),
-        h("button", { onClick:addEdu, style:{background:"none",border:"none",color:"#44403c",fontSize:13,fontWeight:600,cursor:"pointer",padding:0} }, "+ Add school"),
+        h("button", { onClick:addEdu, style:{background:"none",border:"none",color:"#F4F2EC",fontSize:13,fontWeight:700,cursor:"pointer",padding:0} }, "+ Add school"),
         h(SectionLabel, { n:"05" }, "Skills"),
         h(TextArea, { rows:2, value:data.skills, onChange:(e)=>set("skills",e.target.value), label:"Comma separated" }),
         h("div", { style:{height:24} })
       ),
       h("div", { className:"preview-col" },
-        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 2px 20px rgba(0,0,0,0.09)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto"} },
+        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto"} },
           h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16} },
             h("div", null,
-              h("div", { style:{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1} }, data.name || "Your Name"),
-              h("div", { style:{fontSize:14,color:"#B4833C",marginTop:4} }, data.title)
+              h("div", { style:{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1,color:"#191A1D"} }, data.name || "Your Name"),
+              h("div", { style:{fontSize:14,color:"#B87F1E",marginTop:4,fontWeight:600} }, data.title)
             )
           ),
           h("div", { className:"ui-font", style:{fontSize:11,color:"#78716c",display:"flex",flexWrap:"wrap",gap:"2px 12px",marginBottom:20} },
@@ -301,17 +306,17 @@ function App() {
           ),
           data.summary ? h("p", { style:{fontSize:13,lineHeight:1.6,color:"#44403c",marginBottom:20} }, data.summary) : null,
           data.experience.some(e=>e.role||e.company) ? h("div", { style:{marginBottom:20} },
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Experience"),
+            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Experience"),
             data.experience.map((exp) =>
               h("div", { key:exp.id, style:{marginBottom:14} },
                 h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
-                  h("div", { style:{fontSize:14,fontWeight:600} }, exp.role, " ", exp.company ? h("span", { style:{fontWeight:400,color:"#57534e"} }, "— ", exp.company) : null),
+                  h("div", { style:{fontSize:14,fontWeight:700,color:"#191A1D"} }, exp.role, " ", exp.company ? h("span", { style:{fontWeight:400,color:"#57534e"} }, "— ", exp.company) : null),
                   h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e",marginLeft:8} }, exp.start, exp.end ? ` – ${exp.end}` : "")
                 ),
                 h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} },
                   exp.bullets.filter(Boolean).map((b,i) =>
                     h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
-                      h("span", { style:{position:"absolute",left:0,color:"#B4833C"} }, "—"),
+                      h("span", { style:{position:"absolute",left:0,color:"#B87F1E"} }, "—"),
                       b
                     )
                   )
@@ -320,18 +325,18 @@ function App() {
             )
           ) : null,
           data.education.some(e=>e.school) ? h("div", { style:{marginBottom:20} },
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Education"),
+            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Education"),
             data.education.map((edu) =>
               h("div", { key:edu.id, style:{display:"flex",justifyContent:"space-between",marginBottom:6} },
-                h("div", { style:{fontSize:13} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
+                h("div", { style:{fontSize:13,color:"#191A1D"} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
                 h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e"} }, edu.start, edu.end ? ` – ${edu.end}` : "")
               )
             )
           ) : null,
           skillList.length>0 ? h("div", null,
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:600,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Skills"),
+            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Skills"),
             h("div", { style:{display:"flex",flexWrap:"wrap",gap:6} },
-              skillList.map((s,i) => h("span", { key:i, className:"ui-font", style:{fontSize:11,background:"#f5f4f1",borderRadius:4,padding:"3px 8px"} }, s))
+              skillList.map((s,i) => h("span", { key:i, className:"ui-font", style:{fontSize:11,background:"#f5f4f1",color:"#44403c",borderRadius:4,padding:"3px 8px"} }, s))
             )
           ) : null
         )
