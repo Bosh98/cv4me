@@ -131,6 +131,16 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("session_id");
+
+    // TEMPORARY: lets you preview the editor without paying.
+    // Remove this whole "if (params.get('dev')..." block before real launch —
+    // anyone who knows this URL trick could otherwise skip payment entirely.
+    if (params.get("dev") === "1") {
+      setPaid(true);
+      setChecking(false);
+      return;
+    }
+
     if (sid) {
       verifySession(sid);
     } else {
