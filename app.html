@@ -260,7 +260,7 @@ function App() {
       h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"} },
         h("div", { style:{fontWeight:800,fontSize:15,letterSpacing:"-0.02em"} },
           h("span", { style:{fontFamily:"'JetBrains Mono',monospace",color:"#F2A93A",fontSize:11,marginRight:8,fontWeight:500} }, "R/01"),
-          "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"
+          h("a", { href:"https://www.cv4me.io/", style:{color:"#F4F2EC",textDecoration:"none"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME")
         ),
         h("div", { style:{display:"flex",alignItems:"center",gap:10} },
           isDemo ? h("span", { className:"ui-font", style:{fontSize:12,color:"#A29B8C",display:"none"} }) : null,
