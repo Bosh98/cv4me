@@ -95,13 +95,16 @@ function SectionLabel({ n, children }) {
   );
 }
 
+
 function Paywall({ onStart, loading }) {
   return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:24,textAlign:"center"} },
-    h("div", { style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#F2A93A",letterSpacing:"0.1em",textTransform:"uppercase"} },
-      "R/01 · ",
-      h("a", { href:"https://www.cv4me.io/", style:{fontWeight:800,color:"#F4F2EC",textDecoration:"none"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME")
-    ),
-    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),
+    h("div", { style:{fontWeight:800,fontSize:22,letterSpacing:"-0.02em",color:"#F4F2EC"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"),
+    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),  
+    
+      
+      
+    
+    
     h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
     h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
