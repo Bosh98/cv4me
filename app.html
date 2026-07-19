@@ -250,7 +250,7 @@ function App() {
       }, "Retry")
     );
   }
-  if (!paid) {
+  if (!paid && !isDemo) {
     return h(Paywall, { onStart: startCheckout, loading: startingCheckout });
   }
 
