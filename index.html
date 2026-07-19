@@ -4,16 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CV4ME — Resume Builder That Looks Expensive, Costs $1.99</title>
-<meta name="description" content="A resume builder that looks expensive but costs $1.99. No subscription, no account — fill in a form and watch a real formatted document build itself beside you." />
+<meta name="description" content="A resume and CV formatting tool that looks expensive but costs $1.99. No subscription, no account — fill in a form and watch a real formatted document build itself beside you." />
 
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://www.cv4me.io/" />
 <meta property="og:title" content="CV4ME — Resume Builder That Looks Expensive, Costs $1.99" />
-<meta property="og:description" content="No subscription, no account. Fill in a form and watch a real formatted document build itself beside you." />
+<meta property="og:description" content="A resume and CV formatting tool with no subscription, no account. Fill in a form and watch a real formatted document build itself beside you." />
 <meta property="og:image" content="https://www.cv4me.io/og-image.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="CV4ME — Resume Builder That Looks Expensive, Costs $1.99" />
-<meta name="twitter:description" content="No subscription, no account. Fill in a form and watch a real formatted document build itself beside you." />
+<meta name="twitter:description" content="A resume and CV formatting tool with no subscription, no account. Fill in a form and watch a real formatted document build itself beside you." />
 <meta name="twitter:image" content="https://www.cv4me.io/og-image.png" />
 
 <script type="application/ld+json">
@@ -23,7 +23,7 @@
   "name": "CV4ME",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
-  "description": "A resume builder that looks expensive but costs $1.99. No subscription, no account — fill in a form and watch a real formatted document build itself beside you.",
+  "description": "A resume and CV formatting tool that looks expensive but costs $1.99. No subscription, no account — fill in a form and watch a real formatted document build itself beside you.",
   "offers": {
     "@type": "Offer",
     "price": "1.99",
@@ -82,6 +82,30 @@
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Yes, within 14 days if it's not a fit — just reply to your receipt email."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long should a resume be — one page or two?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For most people, one page. Two pages becomes acceptable once you have 10+ years of relevant experience. CV4ME's live preview shows you exactly how long your resume is running as you type, so you're never guessing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's a good resume bullet point formula?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Action verb plus what you did plus the measurable result — for example, 'Led redesign of onboarding flow, lifting activation 18%.' Specific numbers beat vague descriptions every time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is CV4ME a CV formatting tool or a resume builder?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Both — CV and resume mean the same thing in most everyday use, and CV4ME formats either one the same way: live, as you type, exported as a clean PDF."
       }
     }
   ]
@@ -175,10 +199,13 @@
   .price-card .btn{ width:100%; justify-content:center; padding:14px; }
 
   .faq{ max-width:660px; margin:0 auto; }
-  .faq-item{ border-bottom:1px solid var(--line); padding:22px 0; }
+  .faq-item{ border-bottom:1px solid var(--line); padding:18px 0; }
   .faq-item:last-child{ border-bottom:none; }
-  .faq-item h4{ font-size:14.5px; font-weight:700; margin-bottom:7px; }
-  .faq-item p{ font-size:13.5px; color:var(--slate); line-height:1.6; }
+  .faq-item summary{ font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .faq-item summary::-webkit-details-marker{ display:none; }
+  .faq-item summary::after{ content:'+'; color:var(--amber); font-size:20px; font-weight:400; flex-shrink:0; transition:transform .2s var(--ease); }
+  .faq-item[open] summary::after{ transform:rotate(45deg); }
+  .faq-item p{ font-size:13.5px; color:var(--slate); line-height:1.6; margin-top:10px; }
 
   footer{ border-top:1px solid var(--line); padding:36px 0; }
   footer .wrap{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--slate); }
@@ -297,30 +324,42 @@
   <section id="faq">
     <div class="section-head"><span class="n">04</span><h2>Questions</h2><div class="rule"></div></div>
     <div class="faq">
-      <div class="faq-item">
-        <h4>How does the $1.99 work?</h4>
+      <details class="faq-item">
+        <summary>How does the $1.99 work?</summary>
         <p>You pay once when you click "Start a resume." That unlocks the editor for that resume — as many edits and PDF exports as you want. Starting a different resume is a separate $1.99.</p>
-      </div>
-      <div class="faq-item">
-        <h4>Is my resume data stored anywhere?</h4>
+      </details>
+      <details class="faq-item">
+        <summary>Is my resume data stored anywhere?</summary>
         <p>No — everything happens in your browser. Nothing you type is sent to a server.</p>
-      </div>
-      <div class="faq-item">
-        <h4>Is CV4ME free?</h4>
+      </details>
+      <details class="faq-item">
+        <summary>Is CV4ME free?</summary>
         <p>The editor is free to try with sample data via the live preview. Exporting your own finished resume as a PDF costs $1.99, paid once, with no subscription.</p>
-      </div>
-      <div class="faq-item">
-        <h4>Will I have to pay again after I've already built my resume?</h4>
+      </details>
+      <details class="faq-item">
+        <summary>Will I have to pay again after I've already built my resume?</summary>
         <p>No. Unlike builders that let you complete a resume and then paywall the download, CV4ME asks for payment upfront — no surprise paywall at the end.</p>
-      </div>
-      <div class="faq-item">
-        <h4>How is CV4ME different from Zety, Novoresume, or Canva?</h4>
+      </details>
+      <details class="faq-item">
+        <summary>How is CV4ME different from Zety, Novoresume, or Canva?</summary>
         <p>Those are subscription services, typically $20 or more per month. CV4ME has no subscription and no account — $1.99 once per resume, nothing recurs.</p>
-      </div>
-      <div class="faq-item">
-        <h4>Can I get a refund?</h4>
+      </details>
+      <details class="faq-item">
+        <summary>Can I get a refund?</summary>
         <p>Yes, within 14 days if it's not a fit — just reply to your receipt email.</p>
-      </div>
+      </details>
+      <details class="faq-item">
+        <summary>How long should a resume be — one page or two?</summary>
+        <p>For most people, one page. Two pages becomes acceptable once you have 10+ years of relevant experience. CV4ME's live preview shows you exactly how long your resume is running as you type, so you're never guessing.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What's a good resume bullet point formula?</summary>
+        <p>Action verb plus what you did plus the measurable result — for example, "Led redesign of onboarding flow, lifting activation 18%." Specific numbers beat vague descriptions every time.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is CV4ME a CV formatting tool or a resume builder?</summary>
+        <p>Both — CV and resume mean the same thing in most everyday use, and CV4ME formats either one the same way: live, as you type, exported as a clean PDF.</p>
+      </details>
     </div>
   </section>
 </main>
