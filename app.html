@@ -66,7 +66,7 @@ const h = React.createElement;
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const emptyExp = () => ({ id: uid(), role: "", company: "", start: "", end: "", bullets: [""] });
-const emptyEdu = () => ({ id: uid(), school: "", degree: "", start: "", end: "" });
+const emptyEdu = () => ({ id: uid(), school: "", degree: "", start: "", end: "", bullets: [] });
 
 const initialState = {
   name: "", title: "", email: "", phone: "", location: "", link: "",
@@ -99,12 +99,7 @@ function SectionLabel({ n, children }) {
 function Paywall({ onStart, loading }) {
   return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:24,textAlign:"center"} },
     h("a", { href:"https://www.cv4me.io/", style:{fontWeight:800,fontSize:22,letterSpacing:"-0.02em",color:"#F4F2EC",textDecoration:"none",cursor:"pointer"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"),
-    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),  
-    
-      
-      
-    
-    
+    h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),
     h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
     h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
@@ -112,16 +107,63 @@ function Paywall({ onStart, loading }) {
   );
 }
 
-const demoData = {
-  name: "Jordan Ellis", title: "Product Designer", email: "jordan@email.com",
-  phone: "(555) 019-2244", location: "Portland, OR", link: "jordanellis.design",
-  summary: "Product designer with 6 years shaping consumer software, from early prototypes to shipped systems used by millions.",
-  experience: [{
-    id: uid(), role: "Senior Product Designer", company: "Northbeam", start: "2022", end: "Present",
-    bullets: ["Led redesign of onboarding flow, lifting activation 18%", "Built and maintained the company's design system"]
-  }],
-  education: [{ id: uid(), school: "Rhode Island School of Design", degree: "BFA, Graphic Design", start: "2015", end: "2019" }],
-  skills: "Figma, Prototyping, Design Systems, User Research, HTML/CSS",
+// ---- demo templates: one per landing-page gallery card ----
+const demoTemplates = {
+  designer: {
+    name: "Jordan Ellis", title: "Product Designer", email: "jordan@email.com",
+    phone: "(555) 019-2244", location: "Portland, OR", link: "jordanellis.design",
+    summary: "Product designer with 6 years shaping consumer software, from early prototypes to shipped systems used by millions.",
+    experience: [{ id: uid(), role: "Senior Product Designer", company: "Northbeam", start: "2022", end: "Present",
+      bullets: ["Led redesign of onboarding flow, lifting activation 18%", "Built and maintained the company's design system"] }],
+    education: [{ id: uid(), school: "Rhode Island School of Design", degree: "BFA, Graphic Design", start: "2015", end: "2019", bullets: [] }],
+    skills: "Figma, Prototyping, Design Systems, User Research, HTML/CSS",
+  },
+  software: {
+    name: "Maya Chen", title: "Senior Software Engineer", email: "maya.chen@email.com",
+    phone: "(415) 555-0182", location: "San Francisco, CA", link: "github.com/mayachen",
+    summary: "Backend-leaning engineer with 8 years building high-scale services, focused on performance, reliability, and clean system design.",
+    experience: [{ id: uid(), role: "Staff Engineer", company: "Datastride", start: "2021", end: "Present",
+      bullets: ["Cut core API latency 42% across 30+ services", "Led migration to an event-driven architecture"] }],
+    education: [{ id: uid(), school: "UC Berkeley", degree: "BS, Computer Science", start: "2013", end: "2017", bullets: [] }],
+    skills: "Go, Kubernetes, Postgres, gRPC, Distributed Systems",
+  },
+  healthcare: {
+    name: "David Okafor", title: "Registered Nurse, BSN", email: "d.okafor@email.com",
+    phone: "(312) 555-0143", location: "Chicago, IL", link: "",
+    summary: "ICU nurse with 7 years of critical-care experience, known for steady judgement under pressure and mentoring new staff.",
+    experience: [{ id: uid(), role: "ICU Nurse", company: "Mercy General", start: "2018", end: "Present",
+      bullets: ["Managed care for 6+ critical patients per shift", "Precepted 12 new-graduate nurses to independence"] }],
+    education: [{ id: uid(), school: "University of Illinois Chicago", degree: "BSN, Nursing", start: "2013", end: "2017", bullets: [] }],
+    skills: "Critical Care, ACLS, Epic EHR, Triage, Patient Education",
+  },
+  marketing: {
+    name: "Sofia Marino", title: "Growth Marketing Manager", email: "sofia.marino@email.com",
+    phone: "(512) 555-0177", location: "Austin, TX", link: "sofiamarino.co",
+    summary: "Full-funnel growth marketer who turns data into demand, with a track record scaling organic and paid channels profitably.",
+    experience: [{ id: uid(), role: "Marketing Lead", company: "Lumen", start: "2020", end: "Present",
+      bullets: ["Grew organic signups 3.4× in 12 months", "Owned a $1.2M annual paid-acquisition budget"] }],
+    education: [{ id: uid(), school: "University of Texas at Austin", degree: "BBA, Marketing", start: "2012", end: "2016", bullets: [] }],
+    skills: "SEO, Lifecycle, Analytics, Paid Social, Content Strategy",
+  },
+  graduate: {
+    name: "Aiden Walsh", title: "Computer Science Graduate", email: "aiden.walsh@email.com",
+    phone: "07123 456789", location: "Leeds, UK", link: "github.com/aidenwalsh",
+    summary: "Recent CS graduate who ships — comfortable across the stack and happiest turning an idea into a working, used product.",
+    experience: [],
+    education: [{ id: uid(), school: "University of Leeds", degree: "BSc Computer Science", start: "2021", end: "2025",
+      bullets: ["Built a 2,000-user study-planning app as final project", "First place, NorthHack 2025 (48-hour hackathon)"] }],
+    skills: "Python, React, SQL, Git, TypeScript",
+  },
+};
+
+const getDemoData = (key) => {
+  const tpl = demoTemplates[key] || demoTemplates.designer;
+  return {
+    name: tpl.name, title: tpl.title, email: tpl.email, phone: tpl.phone,
+    location: tpl.location, link: tpl.link, summary: tpl.summary, skills: tpl.skills,
+    experience: tpl.experience.map((e) => ({ ...e, id: uid(), bullets: [...e.bullets] })),
+    education: tpl.education.map((e) => ({ ...e, id: uid(), bullets: [...(e.bullets || [])] })),
+  };
 };
 
 function App() {
@@ -186,7 +228,7 @@ function App() {
         restoreSavedData();
         setPaid(true);
       } else if (params.get("preview") === "1") {
-        setData(demoData);
+        setData(getDemoData(params.get("template")));
         setIsDemo(true);
       }
       setChecking(false);
@@ -221,6 +263,9 @@ function App() {
   const addExp = () => setData((d) => ({ ...d, experience: [...d.experience, emptyExp()] }));
   const removeExp = (id) => setData((d) => ({ ...d, experience: d.experience.filter((e) => e.id !== id) }));
   const updateEdu = (id, patch) => setData((d) => ({ ...d, education: d.education.map((e) => (e.id === id ? { ...e, ...patch } : e)) }));
+  const updateEduBullet = (eduId, i, val) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: (e.bullets || []).map((b, bi) => (bi === i ? val : b)) } : e) }));
+  const addEduBullet = (eduId) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: [...(e.bullets || []), ""] } : e) }));
+  const removeEduBullet = (eduId, i) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: (e.bullets || []).filter((_, bi) => bi !== i) } : e) }));
   const addEdu = () => setData((d) => ({ ...d, education: [...d.education, emptyEdu()] }));
   const removeEdu = (id) => setData((d) => ({ ...d, education: d.education.filter((e) => e.id !== id) }));
   const handlePrint = () => window.print();
@@ -316,14 +361,25 @@ function App() {
         h("button", { onClick:addExp, style:{background:"none",border:"none",color:"#F4F2EC",fontSize:13,fontWeight:700,cursor:"pointer",padding:0} }, "+ Add position"),
         h(SectionLabel, { n:"04" }, "Education"),
         data.education.map((edu) =>
-          h("div", { key:edu.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:10,display:"flex",gap:8} },
-            h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
-              h(Field, { label:"School", value:edu.school, onChange:(e)=>updateEdu(edu.id,{school:e.target.value}) }),
-              h(Field, { label:"Degree", value:edu.degree, onChange:(e)=>updateEdu(edu.id,{degree:e.target.value}) }),
-              h(Field, { label:"Start", value:edu.start, onChange:(e)=>updateEdu(edu.id,{start:e.target.value}) }),
-              h(Field, { label:"End", value:edu.end, onChange:(e)=>updateEdu(edu.id,{end:e.target.value}) })
+          h("div", { key:edu.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:10} },
+            h("div", { style:{display:"flex",gap:8} },
+              h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
+                h(Field, { label:"School", value:edu.school, onChange:(e)=>updateEdu(edu.id,{school:e.target.value}) }),
+                h(Field, { label:"Degree", value:edu.degree, onChange:(e)=>updateEdu(edu.id,{degree:e.target.value}) }),
+                h(Field, { label:"Start", value:edu.start, onChange:(e)=>updateEdu(edu.id,{start:e.target.value}) }),
+                h(Field, { label:"End", value:edu.end, onChange:(e)=>updateEdu(edu.id,{end:e.target.value}) })
+              ),
+              h("button", { onClick:()=>removeEdu(edu.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
             ),
-            h("button", { onClick:()=>removeEdu(edu.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
+            h("div", { style:{marginTop:10,display:"flex",flexDirection:"column",gap:6} },
+              (edu.bullets || []).map((b,i) =>
+                h("div", { key:i, style:{display:"flex",gap:6,alignItems:"center"} },
+                  h("input", { className:"field-input", value:b, placeholder:"Achievement, project, honour, or coursework", onChange:(e)=>updateEduBullet(edu.id,i,e.target.value), style:{flex:1,border:"1px solid rgba(244,242,236,0.12)",background:"#22252B",color:"#F4F2EC",borderRadius:6,padding:"6px 8px",fontSize:13} }),
+                  h("button", { onClick:()=>removeEduBullet(edu.id,i), style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
+                )
+              ),
+              h("button", { onClick:()=>addEduBullet(edu.id), style:{background:"none",border:"none",color:"#F2A93A",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"left",padding:0} }, "+ Add line")
+            )
           )
         ),
         h("button", { onClick:addEdu, style:{background:"none",border:"none",color:"#F4F2EC",fontSize:13,fontWeight:700,cursor:"pointer",padding:0} }, "+ Add school"),
@@ -366,9 +422,19 @@ function App() {
           data.education.some(e=>e.school) ? h("div", { style:{marginBottom:20} },
             h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Education"),
             data.education.map((edu) =>
-              h("div", { key:edu.id, style:{display:"flex",justifyContent:"space-between",marginBottom:6} },
-                h("div", { style:{fontSize:13,color:"#191A1D"} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
-                h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e"} }, edu.start, edu.end ? ` – ${edu.end}` : "")
+              h("div", { key:edu.id, style:{marginBottom:8} },
+                h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
+                  h("div", { style:{fontSize:13,color:"#191A1D"} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
+                  h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e"} }, edu.start, edu.end ? ` – ${edu.end}` : "")
+                ),
+                (edu.bullets && edu.bullets.filter(Boolean).length>0) ? h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} },
+                  edu.bullets.filter(Boolean).map((b,i) =>
+                    h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
+                      h("span", { style:{position:"absolute",left:0,color:"#B87F1E"} }, "—"),
+                      b
+                    )
+                  )
+                ) : null
               )
             )
           ) : null,
