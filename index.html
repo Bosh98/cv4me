@@ -62,6 +62,14 @@
     },
     {
       "@type": "Question",
+      "name": "There are free resume builders — why pay $1.99?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Because free usually means you build the whole thing, then meet a paywall at download, or get funnelled into a monthly subscription. CV4ME is $1.99 once, upfront — nothing hidden, nothing recurring. You're paying for honesty as much as the tool."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Will I have to pay again after I've already built my resume?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -122,9 +130,6 @@
 </script>
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  
-
-
 
 <link rel="canonical" href="https://www.cv4me.io/" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -200,6 +205,23 @@
   .feature h3{ font-size:16px; font-weight:700; margin-bottom:9px; letter-spacing:-0.01em; }
   .feature p{ font-size:13.5px; color:var(--slate); line-height:1.6; }
 
+  /* ---- example gallery ---- */
+  .gallery{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+  .mini{ position:relative; display:block; background:var(--paper); color:#191A1D; border-radius:8px; padding:26px 24px 22px; box-shadow:var(--shadow-md); overflow:hidden; transition:transform .3s var(--ease), box-shadow .3s var(--ease); }
+  .mini:hover{ transform:translateY(-4px); box-shadow:0 18px 42px -14px rgba(0,0,0,.6); }
+  .mini::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--amber); }
+  .mini .chip{ position:absolute; top:16px; right:16px; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.09em; text-transform:uppercase; color:var(--amber-dim); border:1px solid rgba(184,127,30,.35); padding:3px 8px; border-radius:20px; }
+  .mini .rname{ font-family:'Source Serif 4',serif; font-size:17px; font-weight:600; color:#191A1D; border-bottom:2px solid #191A1D; padding-bottom:7px; margin-bottom:5px; padding-right:76px; }
+  .mini .rtitle{ color:var(--amber-dim); font-size:10.5px; font-weight:600; margin-bottom:2px; }
+  .mini .rmeta{ font-family:'JetBrains Mono',monospace; font-size:8px; color:#6B655A; margin-bottom:13px; }
+  .mini .rlabel{ font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.12em; text-transform:uppercase; color:#B0AA9C; border-bottom:1px solid #E7E3D8; padding-bottom:4px; margin-bottom:8px; }
+  .mini .rrole{ font-size:10px; font-weight:600; color:#232426; margin-bottom:3px; }
+  .mini .rline{ font-size:9px; color:#6B655A; margin-bottom:3px; padding-left:10px; position:relative; line-height:1.45; }
+  .mini .rline::before{ content:'—'; position:absolute; left:0; color:var(--amber-dim); }
+  .mini .rskills{ margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+  .mini .rskills span{ font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#5C5648; background:#EAE6DB; padding:2px 7px; border-radius:4px; }
+  .gallery-note{ text-align:center; margin-top:28px; font-size:13px; color:var(--slate); }
+
   .pricing{ display:flex; justify-content:center; }
   .price-card{ width:100%; max-width:420px; border-radius:18px; background:var(--ink-card); padding:44px 38px; text-align:center; position:relative; box-shadow:var(--shadow-md); border:1px solid var(--line); }
   .price-card .n{ position:absolute; top:20px; left:22px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); }
@@ -229,6 +251,7 @@
   @media (max-width:860px){
     .hero{ grid-template-columns:1fr; padding:64px 0 48px; text-align:left; }
     .features{ grid-template-columns:1fr; }
+    .gallery{ grid-template-columns:1fr; }
     nav ul{ display:none; }
   }
 </style>
@@ -240,6 +263,7 @@
     <div class="brand"><span class="wordmark">CV<span class="four">4</span>ME</span></div>
     <nav><ul>
       <li><a href="#features">Features</a></li>
+      <li><a href="#examples">Examples</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul></nav>
@@ -314,47 +338,94 @@
       </div>
     </div>
   </section>
-<!-- ===== CV4ME · price-honesty section ===== -->
-<section style="background:#fff;color:#111827;padding:64px 20px;font-family:inherit;">
-  <div style="max-width:680px;margin:0 auto;">
-    <h2 style="font-size:2rem;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;">Why isn't it free?</h2>
-    <p style="font-size:1.15rem;font-weight:600;margin:0 0 16px;">Because "free" has to make money somewhere.</p>
-    <p style="line-height:1.6;margin:0 0 16px;">Most free builders let you do all the work — then charge you to download it. Or lock the good templates behind a $20/month plan you forget to cancel. Or quietly keep your data.</p>
-    <p style="line-height:1.6;margin:0 0 16px;">CV4ME does none of that. <strong>$1.99, once, upfront.</strong> That single payment <em>is</em> the whole business model — so there's nothing to upsell later, no data to harvest, no subscription to escape. You pay for a resume, you get a resume.</p>
-    <p style="font-size:1.25rem;font-weight:800;margin:8px 0 32px;">Honest beats free.</p>
 
-    <div style="border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#f9fafb;">
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;">
-        <span></span><span style="color:#16a34a;">CV4ME</span><span>"Free" builders</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;border-top:1px solid #e5e7eb;font-size:.95rem;">
-        <span style="font-weight:600;">Price</span><span style="color:#16a34a;font-weight:700;">✓ $1.99 once</span><span style="color:#6b7280;">✕ "free"… until download</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;border-top:1px solid #e5e7eb;font-size:.95rem;">
-        <span style="font-weight:600;">Account</span><span style="color:#16a34a;font-weight:700;">✓ None</span><span style="color:#6b7280;">✕ Required</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;border-top:1px solid #e5e7eb;font-size:.95rem;">
-        <span style="font-weight:600;">Subscription</span><span style="color:#16a34a;font-weight:700;">✓ Never</span><span style="color:#6b7280;">✕ $20+/mo after trial</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;border-top:1px solid #e5e7eb;font-size:.95rem;">
-        <span style="font-weight:600;">Your data</span><span style="color:#16a34a;font-weight:700;">✓ Stays in your browser</span><span style="color:#6b7280;">✕ On their servers</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:14px 16px;border-top:1px solid #e5e7eb;font-size:.95rem;">
-        <span style="font-weight:600;">Paywall at the end</span><span style="color:#16a34a;font-weight:700;">✓ Never</span><span style="color:#6b7280;">✕ Usually</span>
+  <section id="examples">
+    <div class="section-head"><span class="n">03</span><h2>See what comes out</h2><div class="rule"></div></div>
+    <div class="gallery">
+      <a class="mini" href="app.html">
+        <div class="chip">Software</div>
+        <div class="rname">Maya Chen</div>
+        <div class="rtitle">Senior Software Engineer</div>
+        <div class="rmeta">maya.chen@email.com · San Francisco, CA</div>
+        <div class="rlabel">Experience</div>
+        <div class="rrole">Staff Engineer — Datastride</div>
+        <div class="rline">Cut core API latency 42% across 30+ services</div>
+        <div class="rline">Led migration to an event-driven architecture</div>
+        <div class="rskills"><span>Go</span><span>Kubernetes</span><span>Postgres</span><span>gRPC</span></div>
+      </a>
+      <a class="mini" href="app.html">
+        <div class="chip">Healthcare</div>
+        <div class="rname">David Okafor</div>
+        <div class="rtitle">Registered Nurse, BSN</div>
+        <div class="rmeta">d.okafor@email.com · Chicago, IL</div>
+        <div class="rlabel">Experience</div>
+        <div class="rrole">ICU Nurse — Mercy General</div>
+        <div class="rline">Managed care for 6+ critical patients per shift</div>
+        <div class="rline">Precepted 12 new-graduate nurses to independence</div>
+        <div class="rskills"><span>Critical Care</span><span>ACLS</span><span>Epic EHR</span></div>
+      </a>
+      <a class="mini" href="app.html">
+        <div class="chip">Marketing</div>
+        <div class="rname">Sofia Marino</div>
+        <div class="rtitle">Growth Marketing Manager</div>
+        <div class="rmeta">sofia.marino@email.com · Austin, TX</div>
+        <div class="rlabel">Experience</div>
+        <div class="rrole">Marketing Lead — Lumen</div>
+        <div class="rline">Grew organic signups 3.4× in 12 months</div>
+        <div class="rline">Owned a $1.2M annual paid-acquisition budget</div>
+        <div class="rskills"><span>SEO</span><span>Lifecycle</span><span>Analytics</span><span>Paid</span></div>
+      </a>
+      <a class="mini" href="app.html">
+        <div class="chip">Graduate</div>
+        <div class="rname">Aiden Walsh</div>
+        <div class="rtitle">Computer Science Graduate</div>
+        <div class="rmeta">aiden.walsh@email.com · Leeds, UK</div>
+        <div class="rlabel">Education</div>
+        <div class="rrole">BSc Computer Science — University of Leeds</div>
+        <div class="rline">Built a 2,000-user study-planning app as final project</div>
+        <div class="rline">First place, NorthHack 2025 (48-hour hackathon)</div>
+        <div class="rskills"><span>Python</span><span>React</span><span>SQL</span></div>
+      </a>
+    </div>
+    <p class="gallery-note">Every style is built live as you type — tap any example to open the editor.</p>
+  </section>
+
+  <!-- ===== 04 · Why isn't it free? ===== -->
+  <section id="honest">
+    <div class="section-head"><span class="n">04</span><h2>Why isn't it free?</h2><div class="rule"></div></div>
+    <div style="max-width:660px; margin:0 auto;">
+      <p style="font-size:17px; font-weight:700; margin-bottom:14px;">Because "free" has to make money somewhere.</p>
+      <p style="font-size:14px; color:var(--slate); line-height:1.7; margin-bottom:14px;">Most free builders let you do all the work — then charge you to download it. Or lock the good templates behind a $20/month plan you forget to cancel. Or quietly keep your data.</p>
+      <p style="font-size:14px; color:var(--slate); line-height:1.7; margin-bottom:18px;">CV4ME does none of that. <strong style="color:var(--paper);">$1.99, once, upfront.</strong> That single payment <em>is</em> the whole business model — nothing to upsell later, no data to harvest, no subscription to escape. You pay for a resume, you get a resume.</p>
+      <p class="serif" style="font-size:21px; font-weight:600; color:var(--amber); margin-bottom:34px;">Honest beats free.</p>
+
+      <div style="background:var(--ink-card); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-md);">
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:15px 20px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--slate);">
+          <span></span><span style="color:var(--amber);">CV4ME</span><span>"Free" builders</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:14px 20px; border-top:1px solid var(--line); font-size:13px;">
+          <span style="font-weight:600;">Price</span><span><span style="color:var(--amber); font-weight:700;">✓</span> $1.99 once</span><span style="color:var(--slate);">✕ "free"… until download</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:14px 20px; border-top:1px solid var(--line); font-size:13px;">
+          <span style="font-weight:600;">Account</span><span><span style="color:var(--amber); font-weight:700;">✓</span> None</span><span style="color:var(--slate);">✕ Required</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:14px 20px; border-top:1px solid var(--line); font-size:13px;">
+          <span style="font-weight:600;">Subscription</span><span><span style="color:var(--amber); font-weight:700;">✓</span> Never</span><span style="color:var(--slate);">✕ $20+/mo after trial</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:14px 20px; border-top:1px solid var(--line); font-size:13px;">
+          <span style="font-weight:600;">Your data</span><span><span style="color:var(--amber); font-weight:700;">✓</span> In your browser</span><span style="color:var(--slate);">✕ On their servers</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:8px; padding:14px 20px; border-top:1px solid var(--line); font-size:13px;">
+          <span style="font-weight:600;">Paywall at the end</span><span><span style="color:var(--amber); font-weight:700;">✓</span> Never</span><span style="color:var(--slate);">✕ Usually</span>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div style="margin-top:40px;padding-top:32px;border-top:1px solid #e5e7eb;">
-      <p style="font-weight:700;margin:0 0 8px;">There are free resume builders — why pay $1.99?</p>
-      <p style="line-height:1.6;margin:0;color:#374151;">Because "free" usually means you build the whole thing, then meet a paywall at download, or get funnelled into a monthly subscription. CV4ME is $1.99 once, upfront — nothing hidden, nothing recurring. You're paying for honesty as much as the tool.</p>
-    </div>
-  </div>
-</section>
   <section id="pricing">
-    <div class="section-head"><span class="n">03</span><h2>Pricing</h2><div class="rule"></div></div>
+    <div class="section-head"><span class="n">05</span><h2>Pricing</h2><div class="rule"></div></div>
     <div class="pricing">
       <div class="price-card">
-  
         <h3>CV4ME — Per resume</h3>
         <div class="amount">$1.99 <span>per resume</span></div>
         <ul>
@@ -370,7 +441,7 @@
   </section>
 
   <section id="faq">
-    <div class="section-head"><span class="n">04</span><h2>Questions</h2><div class="rule"></div></div>
+    <div class="section-head"><span class="n">06</span><h2>Questions</h2><div class="rule"></div></div>
     <div class="faq">
       <details class="faq-item">
         <summary>How does the $1.99 work?</summary>
@@ -383,6 +454,10 @@
       <details class="faq-item">
         <summary>Is CV4ME free?</summary>
         <p>The editor is free to try with sample data via the live preview. Exporting your own finished resume as a PDF costs $1.99, paid once, with no subscription.</p>
+      </details>
+      <details class="faq-item">
+        <summary>There are free resume builders — why pay $1.99?</summary>
+        <p>Because "free" usually means you build the whole thing, then meet a paywall at download, or get funnelled into a monthly subscription. CV4ME is $1.99 once, upfront — nothing hidden, nothing recurring. You're paying for honesty as much as the tool.</p>
       </details>
       <details class="faq-item">
         <summary>Will I have to pay again after I've already built my resume?</summary>
