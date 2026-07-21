@@ -205,21 +205,14 @@
   .feature h3{ font-size:16px; font-weight:700; margin-bottom:9px; letter-spacing:-0.01em; }
   .feature p{ font-size:13.5px; color:var(--slate); line-height:1.6; }
 
-  /* ---- example gallery ---- */
+  /* ---- example gallery: each card mirrors its resume design ---- */
   .gallery{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
-  .mini{ position:relative; display:block; background:var(--paper); color:#191A1D; border-radius:8px; padding:26px 24px 22px; box-shadow:var(--shadow-md); overflow:hidden; transition:transform .3s var(--ease), box-shadow .3s var(--ease); }
+  .mini{ position:relative; display:block; background:var(--paper); color:#191A1D; border-radius:9px; box-shadow:var(--shadow-md); overflow:hidden; transition:transform .3s var(--ease), box-shadow .3s var(--ease); }
   .mini:hover{ transform:translateY(-4px); box-shadow:0 18px 42px -14px rgba(0,0,0,.6); }
-  .mini::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--amber); }
-  .mini .chip{ position:absolute; top:16px; right:16px; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.09em; text-transform:uppercase; color:var(--amber-dim); border:1px solid rgba(184,127,30,.35); padding:3px 8px; border-radius:20px; }
-  .mini .rname{ font-family:'Source Serif 4',serif; font-size:17px; font-weight:600; color:#191A1D; border-bottom:2px solid #191A1D; padding-bottom:7px; margin-bottom:5px; padding-right:76px; }
-  .mini .rtitle{ color:var(--amber-dim); font-size:10.5px; font-weight:600; margin-bottom:2px; }
-  .mini .rmeta{ font-family:'JetBrains Mono',monospace; font-size:8px; color:#6B655A; margin-bottom:13px; }
-  .mini .rlabel{ font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.12em; text-transform:uppercase; color:#B0AA9C; border-bottom:1px solid #E7E3D8; padding-bottom:4px; margin-bottom:8px; }
-  .mini .rrole{ font-size:10px; font-weight:600; color:#232426; margin-bottom:3px; }
-  .mini .rline{ font-size:9px; color:#6B655A; margin-bottom:3px; padding-left:10px; position:relative; line-height:1.45; }
-  .mini .rline::before{ content:'—'; position:absolute; left:0; color:var(--amber-dim); }
-  .mini .rskills{ margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
-  .mini .rskills span{ font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#5C5648; background:#EAE6DB; padding:2px 7px; border-radius:4px; }
+  .mini .chip{ position:absolute; top:14px; right:14px; z-index:2; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.09em; text-transform:uppercase; color:var(--amber-dim); border:1px solid rgba(184,127,30,.35); padding:3px 8px; border-radius:20px; background:rgba(244,242,236,0.72); }
+  .mini .dtag{ font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.09em; text-transform:uppercase; color:var(--amber-dim); }
+  .mini .ln{ font-size:9px; color:#6B655A; margin-bottom:3px; padding-left:10px; position:relative; line-height:1.45; }
+  .mini .ln::before{ content:'—'; position:absolute; left:0; color:var(--amber-dim); }
   .gallery-note{ text-align:center; margin-top:28px; font-size:13px; color:var(--slate); }
 
   .pricing{ display:flex; justify-content:center; }
@@ -328,8 +321,8 @@
       </div>
       <div class="feature">
         <div class="fn">B</div>
-        <h3>Print-ready output</h3>
-        <p>One click produces a clean, correctly margined PDF — built to survive both a human reader and an applicant tracking system.</p>
+        <h3>Four designs, one click</h3>
+        <p>Classic, Modern, Sidebar, or Minimal — switch layouts instantly and the whole document re-typesets. Same details, different look.</p>
       </div>
       <div class="feature">
         <div class="fn">C</div>
@@ -342,54 +335,94 @@
   <section id="examples">
     <div class="section-head"><span class="n">03</span><h2>See what comes out</h2><div class="rule"></div></div>
     <div class="gallery">
+
       <a class="mini" href="app.html?preview=1&template=software">
+        <div style="height:6px; background:var(--amber);"></div>
         <div class="chip">Software</div>
-        <div class="rname">Maya Chen</div>
-        <div class="rtitle">Senior Software Engineer</div>
-        <div class="rmeta">maya.chen@email.com · San Francisco, CA</div>
-        <div class="rlabel">Experience</div>
-        <div class="rrole">Staff Engineer — Datastride</div>
-        <div class="rline">Cut core API latency 42% across 30+ services</div>
-        <div class="rline">Led migration to an event-driven architecture</div>
-        <div class="rskills"><span>Go</span><span>Kubernetes</span><span>Postgres</span><span>gRPC</span></div>
-        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#B87F1E;">Modern layout →</div>
+        <div style="padding:22px 22px 20px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:19px; font-weight:800; letter-spacing:-0.02em; color:#191A1D;">Maya Chen</div>
+          <div style="font-size:10.5px; font-weight:700; color:var(--amber-dim); margin-top:3px;">Senior Software Engineer</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:8px; color:#6B655A; border-top:1px solid #E7E3D8; margin-top:10px; padding-top:8px;">maya.chen@email.com · San Francisco, CA</div>
+          <div style="display:flex; align-items:center; gap:6px; margin:12px 0 8px;">
+            <span style="width:10px; height:10px; background:var(--amber); border-radius:2px; display:inline-block;"></span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#191A1D;">Experience</span>
+          </div>
+          <div style="font-size:10px; font-weight:700; color:#232426; margin-bottom:3px;">Staff Engineer — Datastride</div>
+          <div class="ln">Cut core API latency 42% across 30+ services</div>
+          <div class="ln">Led migration to an event-driven architecture</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#7a5a12; border:1px solid #E7C98A; background:#FBF3E2; border-radius:20px; padding:2px 8px;">Go</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#7a5a12; border:1px solid #E7C98A; background:#FBF3E2; border-radius:20px; padding:2px 8px;">Kubernetes</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#7a5a12; border:1px solid #E7C98A; background:#FBF3E2; border-radius:20px; padding:2px 8px;">Postgres</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#7a5a12; border:1px solid #E7C98A; background:#FBF3E2; border-radius:20px; padding:2px 8px;">gRPC</span>
+          </div>
+          <div class="dtag" style="margin-top:12px;">Modern layout →</div>
+        </div>
       </a>
+
       <a class="mini" href="app.html?preview=1&template=healthcare">
         <div class="chip">Healthcare</div>
-        <div class="rname">David Okafor</div>
-        <div class="rtitle">Registered Nurse, BSN</div>
-        <div class="rmeta">d.okafor@email.com · Chicago, IL</div>
-        <div class="rlabel">Experience</div>
-        <div class="rrole">ICU Nurse — Mercy General</div>
-        <div class="rline">Managed care for 6+ critical patients per shift</div>
-        <div class="rline">Precepted 12 new-graduate nurses to independence</div>
-        <div class="rskills"><span>Critical Care</span><span>ACLS</span><span>Epic EHR</span></div>
-        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#B87F1E;">Classic layout →</div>
+        <div style="padding:24px 22px 20px;">
+          <div style="font-family:'Source Serif 4',serif; font-size:17px; font-weight:600; color:#191A1D; border-bottom:2px solid #191A1D; padding-bottom:7px;">David Okafor</div>
+          <div style="font-size:10.5px; font-weight:600; color:var(--amber-dim); margin-top:5px;">Registered Nurse, BSN</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:8px; color:#6B655A; margin-top:6px;">d.okafor@email.com · Chicago, IL</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.12em; text-transform:uppercase; color:#B0AA9C; border-bottom:1px solid #E7E3D8; padding-bottom:4px; margin:13px 0 8px;">Experience</div>
+          <div style="font-size:10px; font-weight:600; color:#232426; margin-bottom:3px;">ICU Nurse — Mercy General</div>
+          <div class="ln">Managed care for 6+ critical patients per shift</div>
+          <div class="ln">Precepted 12 new-graduate nurses to independence</div>
+          <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#5C5648; background:#EAE6DB; border-radius:4px; padding:2px 7px;">Critical Care</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#5C5648; background:#EAE6DB; border-radius:4px; padding:2px 7px;">ACLS</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#5C5648; background:#EAE6DB; border-radius:4px; padding:2px 7px;">Epic EHR</span>
+          </div>
+          <div class="dtag" style="margin-top:12px;">Classic layout →</div>
+        </div>
       </a>
+
       <a class="mini" href="app.html?preview=1&template=marketing">
         <div class="chip">Marketing</div>
-        <div class="rname">Sofia Marino</div>
-        <div class="rtitle">Growth Marketing Manager</div>
-        <div class="rmeta">sofia.marino@email.com · Austin, TX</div>
-        <div class="rlabel">Experience</div>
-        <div class="rrole">Marketing Lead — Lumen</div>
-        <div class="rline">Grew organic signups 3.4× in 12 months</div>
-        <div class="rline">Owned a $1.2M annual paid-acquisition budget</div>
-        <div class="rskills"><span>SEO</span><span>Lifecycle</span><span>Analytics</span><span>Paid</span></div>
-        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#B87F1E;">Sidebar layout →</div>
+        <div style="display:flex; min-height:214px;">
+          <div style="width:40%; background:#1B1E24; color:#EDEBE4; padding:20px 14px;">
+            <div style="font-size:14px; font-weight:700; line-height:1.15; color:#F4F2EC;">Sofia Marino</div>
+            <div style="font-size:9px; font-weight:600; color:var(--amber); margin-top:5px;">Growth Marketing Manager</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:.14em; text-transform:uppercase; color:#8A94A3; margin:14px 0 6px;">Skills</div>
+            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:7px; color:#EDEBE4; background:rgba(244,242,236,0.10); border-radius:3px; padding:2px 5px;">SEO</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:7px; color:#EDEBE4; background:rgba(244,242,236,0.10); border-radius:3px; padding:2px 5px;">Lifecycle</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:7px; color:#EDEBE4; background:rgba(244,242,236,0.10); border-radius:3px; padding:2px 5px;">Analytics</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:7px; color:#EDEBE4; background:rgba(244,242,236,0.10); border-radius:3px; padding:2px 5px;">Paid</span>
+            </div>
+          </div>
+          <div style="flex:1; padding:20px 18px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.12em; text-transform:uppercase; color:#B0AA9C; border-bottom:1px solid #E7E3D8; padding-bottom:4px; margin-bottom:8px;">Experience</div>
+            <div style="font-size:10px; font-weight:600; color:#232426; margin-bottom:3px;">Marketing Lead — Lumen</div>
+            <div class="ln">Grew organic signups 3.4× in 12 months</div>
+            <div class="ln">Owned a $1.2M annual paid-acquisition budget</div>
+            <div class="dtag" style="margin-top:16px;">Sidebar layout →</div>
+          </div>
+        </div>
       </a>
+
       <a class="mini" href="app.html?preview=1&template=graduate">
         <div class="chip">Graduate</div>
-        <div class="rname">Aiden Walsh</div>
-        <div class="rtitle">Computer Science Graduate</div>
-        <div class="rmeta">aiden.walsh@email.com · Leeds, UK</div>
-        <div class="rlabel">Education</div>
-        <div class="rrole">BSc Computer Science — University of Leeds</div>
-        <div class="rline">Built a 2,000-user study-planning app as final project</div>
-        <div class="rline">First place, NorthHack 2025 (48-hour hackathon)</div>
-        <div class="rskills"><span>Python</span><span>React</span><span>SQL</span></div>
-        <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#B87F1E;">Minimal layout →</div>
+        <div style="padding:26px 22px 20px; text-align:center;">
+          <div style="font-family:'Source Serif 4',serif; font-size:17px; font-weight:600; letter-spacing:0.06em; color:#191A1D;">Aiden Walsh</div>
+          <div style="font-size:8.5px; letter-spacing:0.14em; text-transform:uppercase; color:#78716c; margin-top:7px;">Computer Science Graduate</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:7.5px; color:#6B655A; margin-top:7px;">aiden.walsh@email.com · Leeds, UK</div>
+          <div style="height:1px; background:#E7E3D8; max-width:70px; margin:14px auto 12px;"></div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:.2em; text-transform:uppercase; color:#B0AA9C; margin-bottom:8px;">Education</div>
+          <div style="font-size:10px; font-weight:600; color:#232426; margin-bottom:5px;">BSc Computer Science — University of Leeds</div>
+          <div style="font-size:9px; color:#6B655A; line-height:1.5;">Built a 2,000-user study-planning app as final project</div>
+          <div style="font-size:9px; color:#6B655A; line-height:1.5;">First place, NorthHack 2025 (48-hour hackathon)</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;">
+            <span style="font-size:8px; color:#57534e; border-bottom:1px solid #d6d3cc; padding:1px 3px;">Python</span>
+            <span style="font-size:8px; color:#57534e; border-bottom:1px solid #d6d3cc; padding:1px 3px;">React</span>
+            <span style="font-size:8px; color:#57534e; border-bottom:1px solid #d6d3cc; padding:1px 3px;">SQL</span>
+          </div>
+          <div class="dtag" style="margin-top:12px;">Minimal layout →</div>
+        </div>
       </a>
+
     </div>
     <p class="gallery-note">Four industries, four designs — tap any example to open the live editor and switch freely between all four.</p>
   </section>
