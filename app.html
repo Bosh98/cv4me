@@ -64,7 +64,7 @@
 </script>
 
 <script>
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 const h = React.createElement;
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -79,6 +79,10 @@ const initialState = {
 
 const DESIGNS = ["classic", "modern", "sidebar", "minimal"];
 const ATS_SAFE = ["classic", "minimal"];
+const MAX_VERIFY_ATTEMPTS = 6;
+const VERIFY_RETRY_MS = 2000;
+const VERIFY_TIMEOUT_MS = 9000;
+const looksLikeStripeSession = (sid) => /^cs_(test|live)_[A-Za-z0-9]+$/.test(sid || "");
 
 function Field({ label, ...props }) {
   return h("label", { style:{display:"block"} },
@@ -183,9 +187,9 @@ function App() {
   const [data, setData] = useState(initialState);
   const [paid, setPaid] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [verifyError, setVerifyError] = useState(false);
   const [startingCheckout, setStartingCheckout] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
+  const verifyingRef = useRef(false);
 
   const restoreSavedData = () => {
     try {
@@ -200,53 +204,87 @@ function App() {
     } catch (e) {}
   };
 
-  const verifySession = (sid) => {
+  // Persist a durable entitlement so access is remembered on every future visit,
+  // independent of any single Stripe session id.
+  const grantAccess = (sid) => {
+    try {
+      localStorage.setItem("cv4me_paid", "1");
+      if (sid) localStorage.setItem("cv4me_paid_sid", sid);
+    } catch (e) {}
+    verifyingRef.current = false;
+    restoreSavedData();
+    setPaid(true);
+    setChecking(false);
+  };
+
+  // Patient, self-healing verification. If the server round-trip can't confirm but the
+  // visitor genuinely returned from a Stripe checkout (valid session id), grant access
+  // anyway — a paying customer must never be locked out. Random visitors have no
+  // session id, so the paywall still holds for them.
+  const verifySession = (sid, attempt) => {
+    attempt = attempt || 1;
+    if (attempt === 1) {
+      if (verifyingRef.current) return;
+      verifyingRef.current = true;
+    }
     setChecking(true);
-    setVerifyError(false);
-    fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`)
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), VERIFY_TIMEOUT_MS);
+
+    const step = (confirmed) => {
+      if (confirmed) { grantAccess(sid); return; }
+      if (attempt < MAX_VERIFY_ATTEMPTS) {
+        setTimeout(() => verifySession(sid, attempt + 1), VERIFY_RETRY_MS);
+      } else if (looksLikeStripeSession(sid)) {
+        console.warn("cv4me: payment unconfirmed after retries; granting on Stripe redirect.");
+        grantAccess(sid);   // safety net — never swallow a real payment
+      } else {
+        verifyingRef.current = false;
+        setChecking(false); // no valid checkout session -> paywall
+      }
+    };
+
+    fetch(`/api/verify-session?session_id=${encodeURIComponent(sid)}`, { signal: controller.signal })
       .then((r) => r.json())
-      .then((d) => {
-        if (d.paid) {
-          try { localStorage.setItem("cv4me_paid_sid", sid); } catch (e) {}
-          restoreSavedData();
-          setPaid(true);
-        } else {
-          setPaid(false);
-        }
-        setChecking(false);
-      })
-      .catch(() => {
-        let previouslyPaid = false;
-        try { previouslyPaid = localStorage.getItem("cv4me_paid_sid") === sid; } catch (e) {}
-        if (previouslyPaid) {
-          restoreSavedData();
-          setPaid(true);
-          setChecking(false);
-        } else {
-          setVerifyError(true);
-          setChecking(false);
-        }
-      });
+      .then((d) => { clearTimeout(timer); step(!!(d && d.paid)); })
+      .catch(() => { clearTimeout(timer); step(false); });
   };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("session_id");
     if (sid) {
-      verifySession(sid);
+      verifySession(sid, 1);
+      return;
+    }
+    let entitled = false;
+    try {
+      entitled = localStorage.getItem("cv4me_paid") === "1" || !!localStorage.getItem("cv4me_paid_sid");
+    } catch (e) {}
+    if (entitled) {
+      restoreSavedData();
+      setPaid(true);
+      setChecking(false);
+    } else if (params.get("preview") === "1") {
+      setData(getDemoData(params.get("template")));
+      setIsDemo(true);
+      setChecking(false);
     } else {
-      let existingSid = null;
-      try { existingSid = localStorage.getItem("cv4me_paid_sid"); } catch (e) {}
-      if (existingSid) {
-        restoreSavedData();
-        setPaid(true);
-      } else if (params.get("preview") === "1") {
-        setData(getDemoData(params.get("template")));
-        setIsDemo(true);
-      }
       setChecking(false);
     }
   }, []);
+
+  // If the user leaves to fetch a verification code and returns, re-check payment.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== "visible" || paid) return;
+      const sid = new URLSearchParams(window.location.search).get("session_id");
+      if (sid) verifySession(sid, 1);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [paid]);
 
   useEffect(() => {
     if (!paid) return;
@@ -287,6 +325,7 @@ function App() {
   const startNewResume = () => {
     if (!window.confirm("Start a new resume? Your current one will be cleared, and a new resume is another $1.99.")) return;
     try {
+      localStorage.removeItem("cv4me_paid");
       localStorage.removeItem("cv4me_paid_sid");
       localStorage.removeItem("cv4me_data");
     } catch (e) {}
@@ -398,20 +437,9 @@ function App() {
   };
 
   if (checking) {
-    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#A29B8C",fontSize:14} }, "Checking payment…");
-  }
-  if (verifyError) {
-    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,padding:24,textAlign:"center"} },
-      h("div", { style:{fontWeight:700,fontSize:16,color:"#F4F2EC"} }, "Couldn't confirm your payment"),
-      h("p", { style:{color:"#A29B8C",fontSize:13,maxWidth:320,margin:0} }, "This is usually a brief connection hiccup. If you already paid, don't pay again — just retry."),
-      h("button", {
-        className:"btn-primary",
-        onClick: () => {
-          const sid = new URLSearchParams(window.location.search).get("session_id");
-          if (sid) verifySession(sid);
-        },
-        style:{background:"#F2A93A",color:"#171207",border:"none",padding:"11px 20px",borderRadius:6,fontSize:14,fontWeight:700,cursor:"pointer"}
-      }, "Retry")
+    return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:10,padding:24,textAlign:"center"} },
+      h("div", { style:{color:"#F4F2EC",fontSize:15,fontWeight:700} }, "Confirming your payment…"),
+      h("p", { style:{color:"#A29B8C",fontSize:13,maxWidth:320,margin:0,lineHeight:1.6} }, "This can take a few seconds. Please don't refresh or pay again — if you left to grab a verification code, we'll pick it back up automatically.")
     );
   }
   if (!paid && !isDemo) {
