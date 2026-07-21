@@ -28,6 +28,8 @@
   .btn-primary:active:not(:disabled){ transform:translateY(0); }
   .btn-secondary{ transition:background .15s ease, border-color .15s ease; }
   .btn-secondary:hover{ background:rgba(244,242,236,0.06); border-color:rgba(244,242,236,0.3); }
+  .try-link{ color:var(--slate); text-decoration:none; border-bottom:1px solid rgba(242,169,58,0.45); padding-bottom:1px; transition:color .15s ease; }
+  .try-link:hover{ color:var(--paper); }
   .field-input{ transition:border-color .15s ease, box-shadow .15s ease; }
   .field-input:focus{ outline:none; border-color:var(--amber) !important; box-shadow:0 0 0 3px rgba(242,169,58,0.18); }
   @media (max-width:860px){
@@ -76,6 +78,7 @@ const initialState = {
 };
 
 const DESIGNS = ["classic", "modern", "sidebar", "minimal"];
+const ATS_SAFE = ["classic", "minimal"];
 
 function Field({ label, ...props }) {
   return h("label", { style:{display:"block"} },
@@ -106,7 +109,8 @@ function Paywall({ onStart, loading }) {
     h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor, all four designs, and unlimited edits and PDF exports for this resume."),
     h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
-    )
+    ),
+    h("a", { className:"try-link", href:"app.html?preview=1", style:{marginTop:2,fontSize:13} }, "Not sure? Try the live editor with sample data →")
   );
 }
 
@@ -429,13 +433,19 @@ function App() {
       )
     ),
     h("div", { id:"no-print", style:{borderBottom:"1px solid rgba(244,242,236,0.12)",background:"rgba(12,13,16,0.55)"} },
-      h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"10px 24px",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"} },
-        h("span", { className:"ui-font", style:{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#A29B8C",marginRight:2} }, "Design"),
-        DESIGNS.map((dn) => h("button", { key:dn, onClick:()=>set("design",dn), className:"btn-secondary",
-          style:{textTransform:"capitalize",fontSize:12.5,fontWeight:700,padding:"6px 15px",borderRadius:20,cursor:"pointer",
-            border: data.design===dn ? "1px solid #F2A93A" : "1px solid rgba(244,242,236,0.18)",
-            background: data.design===dn ? "rgba(242,169,58,0.14)" : "transparent",
-            color: data.design===dn ? "#F2A93A" : "#A29B8C"} }, dn))
+      h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"10px 24px"} },
+        h("div", { style:{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"} },
+          h("span", { className:"ui-font", style:{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#A29B8C",marginRight:2} }, "Design"),
+          DESIGNS.map((dn) => h("button", { key:dn, onClick:()=>set("design",dn), className:"btn-secondary",
+            style:{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,fontWeight:700,padding:"6px 14px",borderRadius:20,cursor:"pointer",
+              border: data.design===dn ? "1px solid #F2A93A" : "1px solid rgba(244,242,236,0.18)",
+              background: data.design===dn ? "rgba(242,169,58,0.14)" : "transparent",
+              color: data.design===dn ? "#F2A93A" : "#A29B8C"} },
+            h("span", { style:{textTransform:"capitalize"} }, dn),
+            ATS_SAFE.includes(dn) ? h("span", { style:{fontSize:8.5,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",color:"#93B84A"} }, "ATS") : null
+          ))
+        ),
+        h("div", { className:"ui-font", style:{fontSize:11,color:"#8A94A3",marginTop:8,lineHeight:1.5} }, "Classic & Minimal are single-column — the safest bet for applicant tracking systems (ATS). Sidebar & Modern are built to stand out to a human reader.")
       )
     ),
     isDemo ? h("div", { id:"no-print", style:{background:"rgba(242,169,58,0.08)",borderBottom:"1px solid rgba(242,169,58,0.2)",padding:"10px 24px",textAlign:"center"} },
