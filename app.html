@@ -38,6 +38,7 @@
   @media (max-width:420px){
     .field-grid-2{ grid-template-columns:1fr !important; }
   }
+  #paper, #paper * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   @media print {
     body * { visibility:hidden; }
     #paper, #paper * { visibility:visible; }
@@ -71,7 +72,10 @@ const emptyEdu = () => ({ id: uid(), school: "", degree: "", start: "", end: "",
 const initialState = {
   name: "", title: "", email: "", phone: "", location: "", link: "",
   summary: "", experience: [emptyExp()], education: [emptyEdu()], skills: "",
+  design: "classic",
 };
+
+const DESIGNS = ["classic", "modern", "sidebar", "minimal"];
 
 function Field({ label, ...props }) {
   return h("label", { style:{display:"block"} },
@@ -95,21 +99,21 @@ function SectionLabel({ n, children }) {
   );
 }
 
-
 function Paywall({ onStart, loading }) {
   return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:24,textAlign:"center"} },
     h("a", { href:"https://www.cv4me.io/", style:{fontWeight:800,fontSize:22,letterSpacing:"-0.02em",color:"#F4F2EC",textDecoration:"none",cursor:"pointer"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"),
     h("h1", { className:"paper-font", style:{fontSize:32,fontWeight:600,margin:0,color:"#F4F2EC"} }, "Start a new resume"),
-    h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor and unlimited edits and PDF exports for this resume."),
+    h("p", { style:{color:"#A29B8C",maxWidth:360,fontSize:14,margin:0} }, "Each resume is $1.99, paid once at the start. You'll get the live editor, all four designs, and unlimited edits and PDF exports for this resume."),
     h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
     )
   );
 }
 
-// ---- demo templates: one per landing-page gallery card ----
+// ---- demo templates: one per landing-page gallery card, each with its own design ----
 const demoTemplates = {
   designer: {
+    design: "classic",
     name: "Jordan Ellis", title: "Product Designer", email: "jordan@email.com",
     phone: "(555) 019-2244", location: "Portland, OR", link: "jordanellis.design",
     summary: "Product designer with 6 years shaping consumer software, from early prototypes to shipped systems used by millions.",
@@ -119,6 +123,7 @@ const demoTemplates = {
     skills: "Figma, Prototyping, Design Systems, User Research, HTML/CSS",
   },
   software: {
+    design: "modern",
     name: "Maya Chen", title: "Senior Software Engineer", email: "maya.chen@email.com",
     phone: "(415) 555-0182", location: "San Francisco, CA", link: "github.com/mayachen",
     summary: "Backend-leaning engineer with 8 years building high-scale services, focused on performance, reliability, and clean system design.",
@@ -128,6 +133,7 @@ const demoTemplates = {
     skills: "Go, Kubernetes, Postgres, gRPC, Distributed Systems",
   },
   healthcare: {
+    design: "classic",
     name: "David Okafor", title: "Registered Nurse, BSN", email: "d.okafor@email.com",
     phone: "(312) 555-0143", location: "Chicago, IL", link: "",
     summary: "ICU nurse with 7 years of critical-care experience, known for steady judgement under pressure and mentoring new staff.",
@@ -137,6 +143,7 @@ const demoTemplates = {
     skills: "Critical Care, ACLS, Epic EHR, Triage, Patient Education",
   },
   marketing: {
+    design: "sidebar",
     name: "Sofia Marino", title: "Growth Marketing Manager", email: "sofia.marino@email.com",
     phone: "(512) 555-0177", location: "Austin, TX", link: "sofiamarino.co",
     summary: "Full-funnel growth marketer who turns data into demand, with a track record scaling organic and paid channels profitably.",
@@ -146,6 +153,7 @@ const demoTemplates = {
     skills: "SEO, Lifecycle, Analytics, Paid Social, Content Strategy",
   },
   graduate: {
+    design: "minimal",
     name: "Aiden Walsh", title: "Computer Science Graduate", email: "aiden.walsh@email.com",
     phone: "07123 456789", location: "Leeds, UK", link: "github.com/aidenwalsh",
     summary: "Recent CS graduate who ships — comfortable across the stack and happiest turning an idea into a working, used product.",
@@ -161,6 +169,7 @@ const getDemoData = (key) => {
   return {
     name: tpl.name, title: tpl.title, email: tpl.email, phone: tpl.phone,
     location: tpl.location, link: tpl.link, summary: tpl.summary, skills: tpl.skills,
+    design: tpl.design || "classic",
     experience: tpl.experience.map((e) => ({ ...e, id: uid(), bullets: [...e.bullets] })),
     education: tpl.education.map((e) => ({ ...e, id: uid(), bullets: [...(e.bullets || [])] })),
   };
@@ -282,6 +291,108 @@ function App() {
     setPaid(false);
   };
 
+  // ---------- shared resume-render helpers ----------
+  const bulletNode = (b, i) => h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
+    h("span", { style:{position:"absolute",left:0,color:"#B87F1E"} }, "—"), b);
+  const expNode = (exp) => h("div", { key:exp.id, style:{marginBottom:14} },
+    h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
+      h("div", { style:{fontSize:14,fontWeight:700,color:"#191A1D"} }, exp.role, " ", exp.company ? h("span", { style:{fontWeight:400,color:"#57534e"} }, "— ", exp.company) : null),
+      h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e",marginLeft:8,whiteSpace:"nowrap"} }, exp.start, exp.end ? ` – ${exp.end}` : "")
+    ),
+    h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} }, exp.bullets.filter(Boolean).map(bulletNode))
+  );
+  const eduNode = (edu) => h("div", { key:edu.id, style:{marginBottom:8} },
+    h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
+      h("div", { style:{fontSize:13,color:"#191A1D"} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
+      h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e",whiteSpace:"nowrap"} }, edu.start, edu.end ? ` – ${edu.end}` : "")
+    ),
+    (edu.bullets && edu.bullets.filter(Boolean).length>0) ? h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} }, edu.bullets.filter(Boolean).map(bulletNode)) : null
+  );
+  const barLabel = (txt) => h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, txt);
+  const modernLabel = (txt) => h("div", { className:"ui-font", style:{display:"flex",alignItems:"center",gap:8,marginBottom:10} },
+    h("span", { style:{width:13,height:13,background:"#F2A93A",borderRadius:3,display:"inline-block"} }),
+    h("span", { style:{fontSize:11,fontWeight:800,letterSpacing:"0.12em",textTransform:"uppercase",color:"#191A1D"} }, txt));
+  const minLabel = (txt) => h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",color:"#a8a29e",marginBottom:10,textAlign:"center"} }, txt);
+
+  // ---------- four designs ----------
+  const renderClassic = (contacts, exps, edus, skills) => [
+    h("div", { key:"h", style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16} },
+      h("div", null,
+        h("div", { style:{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1,color:"#191A1D"} }, data.name || "Your Name"),
+        h("div", { style:{fontSize:14,color:"#B87F1E",marginTop:4,fontWeight:600} }, data.title)
+      )
+    ),
+    h("div", { key:"c", className:"ui-font", style:{fontSize:11,color:"#78716c",display:"flex",flexWrap:"wrap",gap:"2px 12px",marginBottom:20} }, contacts.map((v,i)=>h("span",{key:i},v))),
+    data.summary ? h("p", { key:"s", style:{fontSize:13,lineHeight:1.6,color:"#44403c",marginBottom:20} }, data.summary) : null,
+    exps.length ? h("div", { key:"e", style:{marginBottom:20} }, barLabel("Experience"), exps.map(expNode)) : null,
+    edus.length ? h("div", { key:"d", style:{marginBottom:20} }, barLabel("Education"), edus.map(eduNode)) : null,
+    skills.length ? h("div", { key:"k" }, barLabel("Skills"),
+      h("div", { style:{display:"flex",flexWrap:"wrap",gap:6} }, skills.map((s,i)=>h("span",{key:i,className:"ui-font",style:{fontSize:11,background:"#f5f4f1",color:"#44403c",borderRadius:4,padding:"3px 8px"}},s)))
+    ) : null,
+  ];
+
+  const renderModern = (contacts, exps, edus, skills) => [
+    h("div", { key:"bar", style:{height:6,background:"#F2A93A",borderRadius:3,marginBottom:20} }),
+    h("div", { key:"h", style:{marginBottom:12} },
+      h("div", { style:{fontSize:32,fontWeight:700,letterSpacing:"-0.02em",lineHeight:1,color:"#191A1D"} }, data.name || "Your Name"),
+      h("div", { style:{fontSize:14,color:"#B87F1E",marginTop:6,fontWeight:700,letterSpacing:"0.02em"} }, data.title)
+    ),
+    h("div", { key:"c", className:"ui-font", style:{fontSize:11,color:"#78716c",display:"flex",flexWrap:"wrap",gap:"2px 14px",marginBottom:18,borderTop:"1px solid #ececec",paddingTop:12} }, contacts.map((v,i)=>h("span",{key:i},v))),
+    data.summary ? h("p", { key:"s", style:{fontSize:13,lineHeight:1.65,color:"#44403c",marginBottom:22} }, data.summary) : null,
+    exps.length ? h("div", { key:"e", style:{marginBottom:22} }, modernLabel("Experience"), exps.map(expNode)) : null,
+    edus.length ? h("div", { key:"d", style:{marginBottom:22} }, modernLabel("Education"), edus.map(eduNode)) : null,
+    skills.length ? h("div", { key:"k" }, modernLabel("Skills"),
+      h("div", { style:{display:"flex",flexWrap:"wrap",gap:6} }, skills.map((s,i)=>h("span",{key:i,className:"ui-font",style:{fontSize:11,color:"#7a5a12",border:"1px solid #E7C98A",background:"#fdf6e8",borderRadius:20,padding:"3px 10px"}},s)))
+    ) : null,
+  ];
+
+  const renderSidebar = (contacts, exps, edus, skills) => [
+    h("div", { key:"row", style:{display:"flex",minHeight:880,alignItems:"stretch"} },
+      h("div", { style:{width:"34%",background:"#1B1E24",color:"#EDEBE4",padding:"36px 24px"} },
+        h("div", { style:{fontSize:22,fontWeight:700,lineHeight:1.15,color:"#F4F2EC"} }, data.name || "Your Name"),
+        h("div", { style:{fontSize:12.5,color:"#F2A93A",marginTop:6,fontWeight:600} }, data.title),
+        contacts.length ? h("div", { style:{marginTop:24} },
+          h("div", { className:"ui-font", style:{fontSize:9.5,letterSpacing:"0.14em",textTransform:"uppercase",color:"#8A94A3",marginBottom:8} }, "Contact"),
+          contacts.map((v,i)=>h("div",{key:i,className:"ui-font",style:{fontSize:10.5,color:"#C9C6BC",marginBottom:5,wordBreak:"break-word"}},v))
+        ) : null,
+        skills.length ? h("div", { style:{marginTop:24} },
+          h("div", { className:"ui-font", style:{fontSize:9.5,letterSpacing:"0.14em",textTransform:"uppercase",color:"#8A94A3",marginBottom:8} }, "Skills"),
+          h("div", { style:{display:"flex",flexWrap:"wrap",gap:5} }, skills.map((s,i)=>h("span",{key:i,className:"ui-font",style:{fontSize:10,color:"#EDEBE4",background:"rgba(244,242,236,0.10)",borderRadius:4,padding:"3px 7px"}},s)))
+        ) : null
+      ),
+      h("div", { style:{flex:1,padding:"40px 38px"} },
+        data.summary ? h("p", { style:{fontSize:13,lineHeight:1.6,color:"#44403c",marginBottom:20} }, data.summary) : null,
+        exps.length ? h("div", { style:{marginBottom:20} }, barLabel("Experience"), exps.map(expNode)) : null,
+        edus.length ? h("div", { style:{marginBottom:20} }, barLabel("Education"), edus.map(eduNode)) : null
+      )
+    ),
+  ];
+
+  const renderMinimal = (contacts, exps, edus, skills) => [
+    h("div", { key:"h", style:{textAlign:"center",marginBottom:8} },
+      h("div", { style:{fontSize:30,fontWeight:600,letterSpacing:"0.06em",color:"#191A1D"} }, data.name || "Your Name"),
+      data.title ? h("div", { style:{fontSize:12.5,color:"#78716c",marginTop:8,letterSpacing:"0.14em",textTransform:"uppercase"} }, data.title) : null
+    ),
+    h("div", { key:"c", className:"ui-font", style:{fontSize:11,color:"#78716c",display:"flex",justifyContent:"center",flexWrap:"wrap",gap:"2px 14px",marginBottom:18} }, contacts.map((v,i)=>h("span",{key:i},v))),
+    h("div", { key:"rule", style:{height:1,background:"#e7e5e0",margin:"0 auto 24px",maxWidth:110} }),
+    data.summary ? h("p", { key:"s", style:{fontSize:13,lineHeight:1.7,color:"#44403c",marginBottom:24,textAlign:"center",maxWidth:520,marginLeft:"auto",marginRight:"auto"} }, data.summary) : null,
+    exps.length ? h("div", { key:"e", style:{marginBottom:22} }, minLabel("Experience"), exps.map(expNode)) : null,
+    edus.length ? h("div", { key:"d", style:{marginBottom:22} }, minLabel("Education"), edus.map(eduNode)) : null,
+    skills.length ? h("div", { key:"k" }, minLabel("Skills"),
+      h("div", { style:{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"} }, skills.map((s,i)=>h("span",{key:i,className:"ui-font",style:{fontSize:11,color:"#57534e",borderBottom:"1px solid #d6d3cc",padding:"1px 4px"}},s)))
+    ) : null,
+  ];
+
+  const renderPaper = () => {
+    const contacts = [data.email,data.phone,data.location,data.link].filter(Boolean);
+    const exps = data.experience.filter((e)=>e.role||e.company);
+    const edus = data.education.filter((e)=>e.school);
+    if (data.design === "modern")  return renderModern(contacts, exps, edus, skillList);
+    if (data.design === "sidebar") return renderSidebar(contacts, exps, edus, skillList);
+    if (data.design === "minimal") return renderMinimal(contacts, exps, edus, skillList);
+    return renderClassic(contacts, exps, edus, skillList);
+  };
+
   if (checking) {
     return h("div", { style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",color:"#A29B8C",fontSize:14} }, "Checking payment…");
   }
@@ -303,6 +414,8 @@ function App() {
     return h(Paywall, { onStart: startCheckout, loading: startingCheckout });
   }
 
+  const paperPad = data.design === "sidebar" ? 0 : "56px 52px";
+
   return h("div", null,
     h("div", { id:"no-print", style:{borderBottom:"1px solid rgba(244,242,236,0.12)",background:"rgba(12,13,16,0.85)",position:"sticky",top:0,zIndex:10} },
       h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"} },
@@ -311,7 +424,6 @@ function App() {
           h("a", { href:"https://www.cv4me.io/", style:{color:"#F4F2EC",textDecoration:"none"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME")
         ),
         h("div", { style:{display:"flex",alignItems:"center",gap:10} },
-          isDemo ? h("span", { className:"ui-font", style:{fontSize:12,color:"#A29B8C",display:"none"} }) : null,
           isDemo
             ? h("button", { className:"btn-primary", onClick:unlockFromDemo, disabled:startingCheckout, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 18px",borderRadius:6,fontSize:13,fontWeight:700,cursor:startingCheckout?"default":"pointer",opacity:startingCheckout?0.6:1} }, startingCheckout ? "Redirecting…" : "Unlock full export — $1.99")
             : h("button", { className:"btn-primary", onClick:handlePrint, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 16px",borderRadius:6,fontSize:13,fontWeight:700,cursor:"pointer"} }, "Print / Save as PDF"),
@@ -319,8 +431,18 @@ function App() {
         )
       )
     ),
+    h("div", { id:"no-print", style:{borderBottom:"1px solid rgba(244,242,236,0.12)",background:"rgba(12,13,16,0.55)"} },
+      h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"10px 24px",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"} },
+        h("span", { className:"ui-font", style:{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#A29B8C",marginRight:2} }, "Design"),
+        DESIGNS.map((dn) => h("button", { key:dn, onClick:()=>set("design",dn), className:"btn-secondary",
+          style:{textTransform:"capitalize",fontSize:12.5,fontWeight:700,padding:"6px 15px",borderRadius:20,cursor:"pointer",
+            border: data.design===dn ? "1px solid #F2A93A" : "1px solid rgba(244,242,236,0.18)",
+            background: data.design===dn ? "rgba(242,169,58,0.14)" : "transparent",
+            color: data.design===dn ? "#F2A93A" : "#A29B8C"} }, dn))
+      )
+    ),
     isDemo ? h("div", { id:"no-print", style:{background:"rgba(242,169,58,0.08)",borderBottom:"1px solid rgba(242,169,58,0.2)",padding:"10px 24px",textAlign:"center"} },
-      h("span", { className:"ui-font", style:{fontSize:12.5,color:"#F2A93A"} }, "You're previewing with sample data — edit freely. Unlock to export your own resume as a PDF.")
+      h("span", { className:"ui-font", style:{fontSize:12.5,color:"#F2A93A"} }, "You're previewing with sample data — edit freely and switch designs above. Unlock to export your own resume as a PDF.")
     ) : null,
     h("div", { className:"editor-grid" },
       h("div", { id:"no-print" },
@@ -388,62 +510,9 @@ function App() {
         h("div", { style:{height:24} })
       ),
       h("div", { className:"preview-col" },
-        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:"56px 52px",margin:"0 auto",position:"relative"} },
-          isDemo ? h("div", { className:"ui-font", style:{position:"absolute",top:16,right:16,background:"#F2A93A",color:"#171207",fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 10px",borderRadius:20} }, "Preview") : null,
-          h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",borderBottom:"2px solid #1c1917",paddingBottom:12,marginBottom:16} },
-            h("div", null,
-              h("div", { style:{fontSize:28,fontWeight:600,letterSpacing:"-0.01em",lineHeight:1,color:"#191A1D"} }, data.name || "Your Name"),
-              h("div", { style:{fontSize:14,color:"#B87F1E",marginTop:4,fontWeight:600} }, data.title)
-            )
-          ),
-          h("div", { className:"ui-font", style:{fontSize:11,color:"#78716c",display:"flex",flexWrap:"wrap",gap:"2px 12px",marginBottom:20} },
-            [data.email,data.phone,data.location,data.link].filter(Boolean).map((v,i) => h("span", { key:i }, v))
-          ),
-          data.summary ? h("p", { style:{fontSize:13,lineHeight:1.6,color:"#44403c",marginBottom:20} }, data.summary) : null,
-          data.experience.some(e=>e.role||e.company) ? h("div", { style:{marginBottom:20} },
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Experience"),
-            data.experience.map((exp) =>
-              h("div", { key:exp.id, style:{marginBottom:14} },
-                h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
-                  h("div", { style:{fontSize:14,fontWeight:700,color:"#191A1D"} }, exp.role, " ", exp.company ? h("span", { style:{fontWeight:400,color:"#57534e"} }, "— ", exp.company) : null),
-                  h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e",marginLeft:8} }, exp.start, exp.end ? ` – ${exp.end}` : "")
-                ),
-                h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} },
-                  exp.bullets.filter(Boolean).map((b,i) =>
-                    h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
-                      h("span", { style:{position:"absolute",left:0,color:"#B87F1E"} }, "—"),
-                      b
-                    )
-                  )
-                )
-              )
-            )
-          ) : null,
-          data.education.some(e=>e.school) ? h("div", { style:{marginBottom:20} },
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Education"),
-            data.education.map((edu) =>
-              h("div", { key:edu.id, style:{marginBottom:8} },
-                h("div", { style:{display:"flex",justifyContent:"space-between",alignItems:"baseline"} },
-                  h("div", { style:{fontSize:13,color:"#191A1D"} }, edu.school, edu.degree ? h("span", { style:{color:"#78716c"} }, " — ", edu.degree) : null),
-                  h("div", { className:"ui-font", style:{fontSize:10.5,color:"#a8a29e"} }, edu.start, edu.end ? ` – ${edu.end}` : "")
-                ),
-                (edu.bullets && edu.bullets.filter(Boolean).length>0) ? h("ul", { style:{marginTop:4,paddingLeft:0,listStyle:"none"} },
-                  edu.bullets.filter(Boolean).map((b,i) =>
-                    h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
-                      h("span", { style:{position:"absolute",left:0,color:"#B87F1E"} }, "—"),
-                      b
-                    )
-                  )
-                ) : null
-              )
-            )
-          ) : null,
-          skillList.length>0 ? h("div", null,
-            h("div", { className:"ui-font", style:{fontSize:10,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"#a8a29e",borderBottom:"1px solid #e7e5e0",paddingBottom:4,marginBottom:10} }, "Skills"),
-            h("div", { style:{display:"flex",flexWrap:"wrap",gap:6} },
-              skillList.map((s,i) => h("span", { key:i, className:"ui-font", style:{fontSize:11,background:"#f5f4f1",color:"#44403c",borderRadius:4,padding:"3px 8px"} }, s))
-            )
-          ) : null
+        h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:paperPad,margin:"0 auto",position:"relative"} },
+          isDemo ? h("div", { className:"ui-font", style:{position:"absolute",top:16,right:16,zIndex:2,background:"#F2A93A",color:"#171207",fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 10px",borderRadius:20} }, "Preview") : null,
+          renderPaper()
         )
       )
     )
