@@ -215,6 +215,13 @@
   .mini .ln::before{ content:'—'; position:absolute; left:0; color:var(--amber-dim); }
   .gallery-note{ text-align:center; margin-top:28px; font-size:13px; color:var(--slate); }
 
+  /* ---- build-in-public trust strip ---- */
+  .trust-strip{ max-width:640px; margin:0 auto; padding:16px 22px; border:1px solid var(--line); border-radius:12px; background:var(--ink-card); display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; text-align:center; }
+  .trust-strip .t-txt{ font-size:13.5px; color:var(--slate); line-height:1.5; }
+  .trust-strip .t-handle{ color:var(--amber); font-weight:700; }
+  .trust-strip .t-cta{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); border:1px solid rgba(242,169,58,0.4); border-radius:20px; padding:5px 13px; white-space:nowrap; transition:background .2s var(--ease); }
+  .trust-strip .t-cta:hover{ background:rgba(242,169,58,0.12); }
+
   .pricing{ display:flex; justify-content:center; }
   .price-card{ width:100%; max-width:420px; border-radius:18px; background:var(--ink-card); padding:44px 38px; text-align:center; position:relative; box-shadow:var(--shadow-md); border:1px solid var(--line); }
   .price-card .n{ position:absolute; top:20px; left:22px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); }
@@ -237,6 +244,7 @@
 
   footer{ border-top:1px solid var(--line); padding:36px 0; }
   footer .wrap{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--slate); }
+  footer a.foot-x{ color:var(--amber); font-weight:600; }
 
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
@@ -308,10 +316,6 @@
         <h3>Export an ATS-friendly PDF</h3>
         <p>One click produces a clean, print-ready PDF — real selectable text, standard section headings, and single-column designs that applicant tracking systems parse cleanly.</p>
       </div>
-        
-    
-
-      
     </div>
   </section>
 
@@ -463,6 +467,11 @@
     </div>
   </section>
 
+  <div class="trust-strip">
+    <span class="t-txt">Built in public by <a href="https://x.com/boshbuilds" class="t-handle">@boshbuilds</a> — no account, no subscription, nothing stored on a server.</span>
+    <a href="https://x.com/boshbuilds" class="t-cta">Follow the build →</a>
+  </div>
+
   <section id="pricing">
     <div class="section-head"><span class="n">05</span><h2>Pricing</h2><div class="rule"></div></div>
     <div class="pricing">
@@ -531,7 +540,7 @@
 
 <footer>
   <div class="wrap">
-    <span>© 2026 CV4ME</span>
+    <span>© 2026 CV4ME · <a href="https://x.com/boshbuilds" class="foot-x">@boshbuilds</a></span>
     <span>Built for people who'd rather write than format.</span>
   </div>
 </footer>
