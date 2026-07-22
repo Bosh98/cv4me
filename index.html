@@ -132,10 +132,6 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
 <link rel="canonical" href="https://www.cv4me.io/" />
-<script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -155,6 +151,10 @@
   .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
   a{ color:inherit; text-decoration:none; }
   ::selection{ background:rgba(242,169,58,0.28); }
+
+  /* ---- scroll reveal (class added by JS; no-JS users see everything) ---- */
+  .reveal{ opacity:0; transform:translateY(16px); transition:opacity .7s var(--ease), transform .7s var(--ease) !important; }
+  .reveal.in{ opacity:1; transform:translateY(0); transition:opacity .5s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease), background .25s var(--ease) !important; }
 
   header{ position:sticky; top:0; z-index:20; background:rgba(12,13,16,0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom:1px solid var(--line); }
   .nav{ display:flex; align-items:center; justify-content:space-between; height:68px; }
@@ -548,6 +548,26 @@
     <span>Built for people who'd rather write than format.</span>
   </div>
 </footer>
+
+<script>
+(function(){
+  try{
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    var els = document.querySelectorAll('main section:not(.hero) .section-head, .feature, .mini, .trust-strip, .price-card, .faq-item');
+    els.forEach(function(el){ el.classList.add('reveal'); });
+    document.querySelectorAll('.features, .gallery').forEach(function(g){
+      Array.prototype.forEach.call(g.children, function(c, i){ c.style.transitionDelay = (i * 70) + 'ms'; });
+    });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  }catch(e){}
+})();
+</script>
 
 </body>
 </html>
