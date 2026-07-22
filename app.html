@@ -32,7 +32,12 @@
   .try-link:hover{ color:var(--paper); }
   .field-input{ transition:border-color .15s ease, box-shadow .15s ease; }
   .field-input:focus{ outline:none; border-color:var(--amber) !important; box-shadow:0 0 0 3px rgba(242,169,58,0.18); }
+  button:focus-visible, a:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
   #paper{ transition:opacity .14s ease; }
+  .mobile-toggle{ display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:16px; z-index:30; background:rgba(27,30,36,0.94); border:1px solid rgba(244,242,236,0.16); border-radius:999px; padding:4px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:0 10px 30px -10px rgba(0,0,0,.65); }
+  .mobile-toggle button{ border:none; background:transparent; color:var(--slate); font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-weight:700; font-size:13px; padding:8px 18px; border-radius:999px; cursor:pointer; }
+  .mobile-toggle button.active{ background:var(--amber); color:#171207; }
+  .undo-toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; z-index:40; display:flex; align-items:center; gap:14px; background:rgba(27,30,36,0.96); border:1px solid rgba(244,242,236,0.16); border-radius:10px; padding:10px 14px; box-shadow:0 12px 32px -10px rgba(0,0,0,.65); }
   @media (prefers-reduced-motion: reduce){
     #paper{ transition:none; }
   }
@@ -40,6 +45,10 @@
     .editor-grid{ grid-template-columns:1fr; padding:16px; gap:20px; }
     .preview-col{ position:static; }
     #paper{ padding:32px 24px !important; }
+    .mobile-toggle{ display:flex; }
+    .editor-grid.view-edit .preview-col{ display:none; }
+    .editor-grid.view-preview .form-col{ display:none; }
+    .undo-toast{ bottom:84px; max-width:calc(100vw - 32px); }
   }
   @media (max-width:420px){
     .field-grid-2{ grid-template-columns:1fr !important; }
@@ -50,6 +59,8 @@
     #paper, #paper * { visibility:visible; }
     #paper{ position:absolute; top:0; left:0; width:100%; box-shadow:none !important; margin:0 !important; opacity:1 !important; }
     #no-print{ display:none !important; }
+    .preview-col{ display:block !important; }
+    .pb-line{ display:none !important; }
   }
 </style>
 </head>
@@ -189,6 +200,14 @@ const getDemoData = (key) => {
   };
 };
 
+const moveItem = (arr, idx, dir) => {
+  const j = idx + dir;
+  if (idx < 0 || j < 0 || j >= arr.length) return arr;
+  const copy = [...arr];
+  const t = copy[idx]; copy[idx] = copy[j]; copy[j] = t;
+  return copy;
+};
+
 function App() {
   const [data, setData] = useState(initialState);
   const [paid, setPaid] = useState(false);
@@ -197,10 +216,13 @@ function App() {
   const [isDemo, setIsDemo] = useState(false);
   const [fading, setFading] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [pageCount, setPageCount] = useState(1);
+  const [pageInfo, setPageInfo] = useState({ count: 1, pageH: 0 });
+  const [mobileView, setMobileView] = useState("edit");
+  const [undoState, setUndoState] = useState(null);
   const verifyingRef = useRef(false);
   const savedTimer = useRef(null);
   const fadeTimer = useRef(null);
+  const undoTimer = useRef(null);
   const firstSave = useRef(true);
 
   const restoreSavedData = () => {
@@ -315,22 +337,23 @@ function App() {
     } catch (e) {}
   }, [data, paid]);
 
-  // Live page-length estimate: paper height vs A4 aspect at current width.
+  // Live page-length estimate + page-break positions.
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       const el = document.getElementById("paper");
       if (!el || el.clientWidth < 10) return;
       const pageH = el.clientWidth * A4_RATIO;
       const pages = Math.max(1, Math.ceil(el.scrollHeight / pageH - 0.04));
-      setPageCount(pages);
+      setPageInfo({ count: pages, pageH: pageH });
     });
     return () => cancelAnimationFrame(id);
-  }, [data, paid, isDemo]);
+  }, [data, paid, isDemo, mobileView]);
 
   // Timer hygiene on unmount.
   useEffect(() => () => {
     if (savedTimer.current) clearTimeout(savedTimer.current);
     if (fadeTimer.current) clearTimeout(fadeTimer.current);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
   }, []);
 
   const startCheckout = async () => {
@@ -361,19 +384,59 @@ function App() {
     }, 140);
   };
 
+  // Undo support for entry deletes.
+  const fireUndo = (label, snapshot) => {
+    setUndoState({ label: label, snapshot: snapshot });
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    undoTimer.current = setTimeout(() => setUndoState(null), 5000);
+  };
+  const undo = () => {
+    if (!undoState) return;
+    setData(undoState.snapshot);
+    setUndoState(null);
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+  };
+
   const updateExp = (id, patch) => setData((d) => ({ ...d, experience: d.experience.map((e) => (e.id === id ? { ...e, ...patch } : e)) }));
   const updateBullet = (expId, i, val) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: e.bullets.map((b, bi) => (bi === i ? val : b)) } : e) }));
   const addBullet = (expId) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: [...e.bullets, ""] } : e) }));
   const removeBullet = (expId, i) => setData((d) => ({ ...d, experience: d.experience.map((e) => e.id === expId ? { ...e, bullets: e.bullets.filter((_, bi) => bi !== i) } : e) }));
   const addExp = () => setData((d) => ({ ...d, experience: [...d.experience, emptyExp()] }));
-  const removeExp = (id) => setData((d) => ({ ...d, experience: d.experience.filter((e) => e.id !== id) }));
+  const removeExp = (id) => {
+    const snapshot = data;
+    setData((d) => ({ ...d, experience: d.experience.filter((e) => e.id !== id) }));
+    fireUndo("Position removed", snapshot);
+  };
+  const moveExp = (id, dir) => setData((d) => {
+    const i = d.experience.findIndex((e) => e.id === id);
+    return { ...d, experience: moveItem(d.experience, i, dir) };
+  });
   const updateEdu = (id, patch) => setData((d) => ({ ...d, education: d.education.map((e) => (e.id === id ? { ...e, ...patch } : e)) }));
   const updateEduBullet = (eduId, i, val) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: (e.bullets || []).map((b, bi) => (bi === i ? val : b)) } : e) }));
   const addEduBullet = (eduId) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: [...(e.bullets || []), ""] } : e) }));
   const removeEduBullet = (eduId, i) => setData((d) => ({ ...d, education: d.education.map((e) => e.id === eduId ? { ...e, bullets: (e.bullets || []).filter((_, bi) => bi !== i) } : e) }));
   const addEdu = () => setData((d) => ({ ...d, education: [...d.education, emptyEdu()] }));
-  const removeEdu = (id) => setData((d) => ({ ...d, education: d.education.filter((e) => e.id !== id) }));
-  const handlePrint = () => window.print();
+  const removeEdu = (id) => {
+    const snapshot = data;
+    setData((d) => ({ ...d, education: d.education.filter((e) => e.id !== id) }));
+    fireUndo("Education removed", snapshot);
+  };
+  const moveEdu = (id, dir) => setData((d) => {
+    const i = d.education.findIndex((e) => e.id === id);
+    return { ...d, education: moveItem(d.education, i, dir) };
+  });
+
+  // Print with a proper PDF filename (tab title becomes "Name — Resume" during print).
+  const handlePrint = () => {
+    const prev = document.title;
+    const nm = (data.name || "").trim();
+    document.title = nm ? nm + " — Resume" : "Resume — CV4ME";
+    const restore = () => { document.title = prev; window.removeEventListener("afterprint", restore); };
+    window.addEventListener("afterprint", restore);
+    window.print();
+    setTimeout(restore, 2000);
+  };
+
   const skillList = data.skills.split(",").map((s) => s.trim()).filter(Boolean);
 
   const startNewResume = () => {
@@ -387,6 +450,10 @@ function App() {
     setData(initialState);
     setPaid(false);
   };
+
+  const arrowBtn = (label, disabled, onClick, glyph) =>
+    h("button", { onClick: onClick, disabled: disabled, "aria-label": label, title: label,
+      style:{background:"none",border:"none",color: disabled ? "#3A3E45" : "#A29B8C",cursor: disabled ? "default" : "pointer",fontSize:11,padding:"2px 4px",lineHeight:1} }, glyph);
 
   // ---------- shared resume-render helpers ----------
   const bulletNode = (b, i) => h("li", { key:i, style:{fontSize:12.5,color:"#44403c",paddingLeft:14,position:"relative",marginBottom:2} },
@@ -507,7 +574,7 @@ function App() {
       h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"} },
         h("a", { href:"https://www.cv4me.io/", style:{fontWeight:800,fontSize:16,letterSpacing:"-0.02em",color:"#F4F2EC",textDecoration:"none"} }, "CV", h("span", { style:{color:"#F2A93A"} }, "4"), "ME"),
         h("div", { style:{display:"flex",alignItems:"center",gap:12} },
-          !isDemo ? h("span", { className:"ui-font", style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#A29B8C",opacity:saved?1:0,transition:"opacity .35s ease",whiteSpace:"nowrap"} },
+          !isDemo ? h("span", { className:"ui-font", role:"status", "aria-live":"polite", style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#A29B8C",opacity:saved?1:0,transition:"opacity .35s ease",whiteSpace:"nowrap"} },
             h("span", { style:{color:"#F2A93A"} }, "✓ "), "Saved") : null,
           isDemo
             ? h("button", { className:"btn-primary", onClick:unlockFromDemo, disabled:startingCheckout, style:{background:"#F2A93A",color:"#171207",border:"none",padding:"9px 18px",borderRadius:6,fontSize:13,fontWeight:700,cursor:startingCheckout?"default":"pointer",opacity:startingCheckout?0.6:1} }, startingCheckout ? "Redirecting…" : "Unlock full export — $1.99")
@@ -520,7 +587,7 @@ function App() {
       h("div", { style:{maxWidth:1120,margin:"0 auto",padding:"10px 24px"} },
         h("div", { style:{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"} },
           h("span", { className:"ui-font", style:{fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:"#A29B8C",marginRight:2} }, "Design"),
-          DESIGNS.map((dn) => h("button", { key:dn, onClick:()=>switchDesign(dn), className:"btn-secondary",
+          DESIGNS.map((dn) => h("button", { key:dn, onClick:()=>switchDesign(dn), className:"btn-secondary", "aria-pressed": data.design===dn,
             style:{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,fontWeight:700,padding:"6px 14px",borderRadius:20,cursor:"pointer",
               border: data.design===dn ? "1px solid #F2A93A" : "1px solid rgba(244,242,236,0.18)",
               background: data.design===dn ? "rgba(242,169,58,0.14)" : "transparent",
@@ -535,8 +602,8 @@ function App() {
     isDemo ? h("div", { id:"no-print", style:{background:"rgba(242,169,58,0.08)",borderBottom:"1px solid rgba(242,169,58,0.2)",padding:"10px 24px",textAlign:"center"} },
       h("span", { className:"ui-font", style:{fontSize:12.5,color:"#F2A93A"} }, "You're previewing with sample data — edit freely and switch designs above. Unlock to export your own resume as a PDF.")
     ) : null,
-    h("div", { className:"editor-grid" },
-      h("div", { id:"no-print" },
+    h("div", { className:"editor-grid view-" + mobileView },
+      h("div", { id:"no-print", className:"form-col" },
         h(SectionLabel, { n:"01" }, "Identity"),
         h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10} },
           h(Field, { label:"Full name", value:data.name, onChange:(e)=>set("name",e.target.value) }),
@@ -549,7 +616,7 @@ function App() {
         h(SectionLabel, { n:"02" }, "Summary"),
         h(TextArea, { rows:3, value:data.summary, onChange:(e)=>set("summary",e.target.value), label:"Two or three sentences" }),
         h(SectionLabel, { n:"03" }, "Experience"),
-        data.experience.map((exp) =>
+        data.experience.map((exp, idx) =>
           h("div", { key:exp.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:14} },
             h("div", { style:{display:"flex",gap:8} },
               h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
@@ -558,13 +625,17 @@ function App() {
                 h(Field, { label:"Start", value:exp.start, onChange:(e)=>updateExp(exp.id,{start:e.target.value}) }),
                 h(Field, { label:"End", value:exp.end, onChange:(e)=>updateExp(exp.id,{end:e.target.value}) })
               ),
-              h("button", { onClick:()=>removeExp(exp.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
+              h("div", { style:{display:"flex",flexDirection:"column",gap:2,alignItems:"center",marginTop:16} },
+                arrowBtn("Move position up", idx===0, ()=>moveExp(exp.id,-1), "▲"),
+                arrowBtn("Move position down", idx===data.experience.length-1, ()=>moveExp(exp.id,1), "▼"),
+                h("button", { onClick:()=>removeExp(exp.id), "aria-label":"Remove position", title:"Remove position", style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",fontSize:13,padding:"2px 4px",lineHeight:1} }, "✕")
+              )
             ),
             h("div", { style:{marginTop:10,display:"flex",flexDirection:"column",gap:6} },
               exp.bullets.map((b,i) =>
                 h("div", { key:i, style:{display:"flex",gap:6,alignItems:"center"} },
                   h("input", { className:"field-input", value:b, placeholder:"What did you do, and what changed?", onChange:(e)=>updateBullet(exp.id,i,e.target.value), style:{flex:1,border:"1px solid rgba(244,242,236,0.12)",background:"#22252B",color:"#F4F2EC",borderRadius:6,padding:"6px 8px",fontSize:13} }),
-                  h("button", { onClick:()=>removeBullet(exp.id,i), style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
+                  h("button", { onClick:()=>removeBullet(exp.id,i), "aria-label":"Remove line", title:"Remove line", style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
                 )
               ),
               h("button", { onClick:()=>addBullet(exp.id), style:{background:"none",border:"none",color:"#F2A93A",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"left",padding:0} }, "+ Add line")
@@ -573,7 +644,7 @@ function App() {
         ),
         h("button", { onClick:addExp, style:{background:"none",border:"none",color:"#F4F2EC",fontSize:13,fontWeight:700,cursor:"pointer",padding:0} }, "+ Add position"),
         h(SectionLabel, { n:"04" }, "Education"),
-        data.education.map((edu) =>
+        data.education.map((edu, idx) =>
           h("div", { key:edu.id, style:{border:"1px solid rgba(244,242,236,0.12)",borderRadius:8,background:"#1B1E24",padding:14,marginBottom:10} },
             h("div", { style:{display:"flex",gap:8} },
               h("div", { className:"field-grid-2", style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,flex:1} },
@@ -582,13 +653,17 @@ function App() {
                 h(Field, { label:"Start", value:edu.start, onChange:(e)=>updateEdu(edu.id,{start:e.target.value}) }),
                 h(Field, { label:"End", value:edu.end, onChange:(e)=>updateEdu(edu.id,{end:e.target.value}) })
               ),
-              h("button", { onClick:()=>removeEdu(edu.id), style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",alignSelf:"flex-start",marginTop:20} }, "✕")
+              h("div", { style:{display:"flex",flexDirection:"column",gap:2,alignItems:"center",marginTop:16} },
+                arrowBtn("Move education up", idx===0, ()=>moveEdu(edu.id,-1), "▲"),
+                arrowBtn("Move education down", idx===data.education.length-1, ()=>moveEdu(edu.id,1), "▼"),
+                h("button", { onClick:()=>removeEdu(edu.id), "aria-label":"Remove education", title:"Remove education", style:{background:"none",border:"none",color:"#A29B8C",cursor:"pointer",fontSize:13,padding:"2px 4px",lineHeight:1} }, "✕")
+              )
             ),
             h("div", { style:{marginTop:10,display:"flex",flexDirection:"column",gap:6} },
               (edu.bullets || []).map((b,i) =>
                 h("div", { key:i, style:{display:"flex",gap:6,alignItems:"center"} },
                   h("input", { className:"field-input", value:b, placeholder:"Achievement, project, honour, or coursework", onChange:(e)=>updateEduBullet(edu.id,i,e.target.value), style:{flex:1,border:"1px solid rgba(244,242,236,0.12)",background:"#22252B",color:"#F4F2EC",borderRadius:6,padding:"6px 8px",fontSize:13} }),
-                  h("button", { onClick:()=>removeEduBullet(edu.id,i), style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
+                  h("button", { onClick:()=>removeEduBullet(edu.id,i), "aria-label":"Remove line", title:"Remove line", style:{background:"none",border:"none",color:"#5C574D",cursor:"pointer"} }, "✕")
                 )
               ),
               h("button", { onClick:()=>addEduBullet(edu.id), style:{background:"none",border:"none",color:"#F2A93A",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"left",padding:0} }, "+ Add line")
@@ -601,16 +676,29 @@ function App() {
         h("div", { style:{height:24} })
       ),
       h("div", { className:"preview-col" },
-        h("div", { id:"no-print", className:"ui-font", style:{display:"flex",justifyContent:"center",marginBottom:10} },
-          h("span", { style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:"0.04em",padding:"5px 13px",borderRadius:20,border:"1px solid rgba(244,242,236,0.14)",background:"rgba(27,30,36,0.85)",color: pageCount===1 ? "#F2A93A" : "#A29B8C",transition:"color .3s ease"} },
-            pageCount===1 ? "~1 page ✓" : ("~" + pageCount + " pages — consider trimming"))
+        h("div", { id:"no-print", className:"ui-font", role:"status", "aria-live":"polite", style:{display:"flex",justifyContent:"center",marginBottom:10} },
+          h("span", { style:{fontFamily:"'JetBrains Mono',monospace",fontSize:11,letterSpacing:"0.04em",padding:"5px 13px",borderRadius:20,border:"1px solid rgba(244,242,236,0.14)",background:"rgba(27,30,36,0.85)",color: pageInfo.count===1 ? "#F2A93A" : "#A29B8C",transition:"color .3s ease"} },
+            pageInfo.count===1 ? "~1 page ✓" : ("~" + pageInfo.count + " pages — consider trimming"))
         ),
         h("div", { id:"paper", className:"paper-font", style:{background:"#fff",boxShadow:"0 24px 60px -16px rgba(0,0,0,0.6)",maxWidth:680,minHeight:880,padding:paperPad,margin:"0 auto",position:"relative",opacity: fading ? 0 : 1} },
           isDemo ? h("div", { className:"ui-font", style:{position:"absolute",top:16,right:16,zIndex:2,background:"#F2A93A",color:"#171207",fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 10px",borderRadius:20} }, "Preview") : null,
+          pageInfo.count > 1 ? Array.from({ length: pageInfo.count - 1 }, (_, i) =>
+            h("div", { key:"pb"+i, className:"pb-line", "aria-hidden":"true", style:{position:"absolute",left:0,right:0,top:pageInfo.pageH*(i+1),borderTop:"1px dashed rgba(184,127,30,0.55)",zIndex:1,pointerEvents:"none"} },
+              h("span", { className:"ui-font", style:{position:"absolute",right:8,top:-9,fontSize:8.5,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",color:"#B87F1E",background:"#fff",padding:"0 6px",borderRadius:3} }, "Page " + (i+1) + " ends")
+            )
+          ) : null,
           renderPaper()
         )
       )
-    )
+    ),
+    h("div", { id:"no-print", className:"mobile-toggle", role:"group", "aria-label":"Editor view" },
+      h("button", { className: mobileView==="edit" ? "active" : "", "aria-pressed": mobileView==="edit", onClick:()=>setMobileView("edit") }, "Edit"),
+      h("button", { className: mobileView==="preview" ? "active" : "", "aria-pressed": mobileView==="preview", onClick:()=>setMobileView("preview") }, "Preview")
+    ),
+    undoState ? h("div", { className:"undo-toast ui-font", role:"status", "aria-live":"polite" },
+      h("span", { style:{fontSize:13,color:"#F4F2EC"} }, undoState.label),
+      h("button", { onClick:undo, style:{background:"none",border:"none",color:"#F2A93A",fontWeight:800,fontSize:13,cursor:"pointer",padding:0} }, "Undo")
+    ) : null
   );
 }
 
