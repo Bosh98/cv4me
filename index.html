@@ -178,8 +178,10 @@
   h1{ font-size:clamp(40px,4.8vw,60px); line-height:1.05; letter-spacing:-0.025em; font-weight:500; opacity:0; animation:rise .8s var(--ease) .08s forwards; color:var(--slate); }
   h1 em{ font-style:italic; color:var(--paper); font-weight:600; }
   .hero p.sub{ margin-top:22px; font-size:17px; color:var(--slate); max-width:430px; line-height:1.6; opacity:0; animation:rise .8s var(--ease) .16s forwards; }
-  .hero-cta{ margin-top:34px; display:flex; align-items:center; gap:18px; opacity:0; animation:rise .8s var(--ease) .24s forwards; }
+  .hero-cta{ margin-top:34px; display:flex; align-items:center; gap:22px; flex-wrap:wrap; opacity:0; animation:rise .8s var(--ease) .24s forwards; }
   .price-note{ font-size:13px; color:var(--slate); }
+  .hero-try{ font-size:14px; color:var(--slate); border-bottom:1px solid rgba(242,169,58,0.45); padding-bottom:1px; transition:color .2s var(--ease); }
+  .hero-try:hover{ color:var(--paper); }
 
   @keyframes rise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
   @keyframes float{ 0%,100%{ transform:rotate(1.6deg) translateY(0); } 50%{ transform:rotate(1.6deg) translateY(-8px); } }
@@ -287,8 +289,9 @@
       <p class="sub">Fill in a form, watch a real document come together beside it, print or save as a PDF that looks like it came from a print shop — not a template site.</p>
       <div class="hero-cta">
         <a class="btn" href="app.html">Start a resume — $1.99</a>
-        <span class="price-note">pay once per resume, no account</span>
+        <a class="hero-try" href="app.html?preview=1">Try it first, no signup →</a>
       </div>
+      <p class="price-note" style="margin-top:14px; opacity:0; animation:rise .8s var(--ease) .3s forwards;">Pay once per resume · no account · 14-day refund</p>
     </div>
     <div class="paper-stage">
       <div class="paper">
@@ -471,7 +474,7 @@
           <li>Pay again only when you start a new one</li>
         </ul>
         <a class="btn" href="app.html">Start a resume — $1.99</a>
-        <div style="margin-top:14px; font-size:11.5px; color:var(--slate);">🔒 Payments processed securely by Stripe</div>
+        <div style="margin-top:14px; font-size:11.5px; color:var(--slate);">🔒 Payments processed securely by Stripe · 14-day refund</div>
       </div>
     </div>
   </section>
