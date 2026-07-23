@@ -27,6 +27,13 @@ module.exports = async (req, res) => {
       ],
       success_url: `${origin}/app.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/app.html`,
+      // Appended to the account-level statement descriptor prefix.
+      // Renders as "BOSHBUILDS* CV4ME" on the customer's card statement.
+      payment_intent_data: {
+        statement_descriptor_suffix: "CV4ME",
+      },
+      // Tags the session so per-product reporting works once there's a 2nd product.
+      metadata: { product: "cv4me" },
     });
 
     res.status(200).json({ url: session.url });
