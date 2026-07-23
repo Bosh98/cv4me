@@ -131,6 +131,7 @@ function Paywall({ onStart, loading }) {
     h("button", { className:"btn-primary", onClick:onStart, disabled:loading, style:{marginTop:8,background:"#F2A93A",color:"#171207",border:"none",padding:"12px 22px",borderRadius:6,fontSize:14,fontWeight:700,cursor:loading?"default":"pointer",opacity:loading?0.6:1} },
       loading ? "Redirecting to checkout…" : "Start new resume — $1.99"
     ),
+    h("div", { className:"ui-font", style:{fontSize:11.5,color:"#8A94A3",lineHeight:1.5} }, "🔒 Secure checkout via Stripe · 14-day refund if it's not a fit"),
     h("a", { className:"try-link", href:"app.html?preview=1", style:{marginTop:2,fontSize:13} }, "Not sure? Try the live editor with sample data →")
   );
 }
